@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "444766987818",
+    "firebase_url": "https://soy-key-181418.firebaseio.com",
+    "project_id": "soy-key-181418",
+    "storage_bucket": "soy-key-181418.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:444766987818:android:93080f242c52359c",
+        "android_client_info": {
+          "package_name": "com.pajtek.spotifind"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "444766987818-nrstuv4fupmi53cnffhulgha6ml2cp08.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyALvxcTNre7D5CdfMgAZFRN8faKklAcxV0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
