@@ -338,7 +338,7 @@ public class MapsActivity extends FragmentActivity implements
         String unixTimeId = String.valueOf(new Date().getTime());
 
         DatabaseReference base = spots.child(unixTimeId);
-        base.child("track-id").setValue(trackId);
+        base.child("trackId").setValue(trackId);
 
         Map<String, Object> locMap = new HashMap<>();
         locMap.put("lat", pos.latitude);
@@ -592,13 +592,13 @@ public class MapsActivity extends FragmentActivity implements
         spots.child(key).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                DataSnapshot track = dataSnapshot.child("track-info");
+                DataSnapshot info = dataSnapshot.child("info");
                 SpotMarker spotMarker = new SpotMarker(mMap,
                         key,
-                        track.child("name").getValue().toString(),
-                        dataSnapshot.child("track-id").toString(),
-                        track.child("artistName").getValue().toString(),
-                        track.child("albumCoverWebUrl").getValue().toString(),
+                        info.child("name").getValue().toString(),
+                        dataSnapshot.child("trackId").toString(),
+                        info.child("artistName").getValue().toString(),
+                        info.child("albumCoverWebUrl").getValue().toString(),
                         new LatLng(location.latitude,location.longitude));
             }
 

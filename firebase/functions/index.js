@@ -44,8 +44,8 @@ exports.removeSpot = functions.database
 });
 
 exports.fetchSongData = functions.database
-.ref('spots/{spotId}/track-id')
-.onCreate(event => {
+.ref('spots/{spotId}/trackId')
+.onWrite(event => {
     var client_id = fs.readFileSync('PUBLIC_KEY', 'utf8');
     var client_secret = fs.readFileSync('SECRET_KEY', 'utf8');
     var authHeader = 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64'));
@@ -83,8 +83,8 @@ exports.fetchSongData = functions.database
               var info = res.body;
               
 
-              var track = event.data.ref.parent;
-              resolve(track.set({
+              var track_id = event.data.ref;
+              resolve(track_id.parent.child('info').set({
                 'name': info.name,
                 'artistName': info.artists[0].name,
                 'albumCoverWebUrl': info.album.images[1].url
