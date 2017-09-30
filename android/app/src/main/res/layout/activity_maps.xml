@@ -11,12 +11,12 @@
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical|center_horizontal"
         android:padding="10dp"
         android:paddingRight="10dp"
-        android:layout_gravity="center_vertical|center_horizontal"
-        android:text="Demo Button"
+        android:src="@android:drawable/presence_video_away"
 
-        />
+        android:text="Demo Button" />
 
     <Button
         android:layout_width="wrap_content"
