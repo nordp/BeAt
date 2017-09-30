@@ -19,7 +19,7 @@ import java.net.URL;
 
 class SpotMarker {
 
-    private int spotKey;
+    private String spotKey;
 
     //Track info
     private String trackName;
@@ -28,7 +28,7 @@ class SpotMarker {
 
     MarkerOptions customMarker;
 
-    SpotMarker(final GoogleMap mMap, int spotKey, String trackName, String trackId, String artistName, final String albumCoverWebUrl, final LatLng latLng) {
+    SpotMarker(final GoogleMap mMap, String spotKey, String trackName, String trackId, String artistName, final String albumCoverWebUrl, final LatLng latLng) {
         this.spotKey = spotKey;
         this.trackName = trackName;
         this.trackUri = "spotify:track:" + trackId;

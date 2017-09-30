@@ -595,7 +595,7 @@ public class MapsActivity extends FragmentActivity implements
                 Log.d("MapsActivity", dataSnapshot.child("track").getValue().toString());
                 DataSnapshot track = dataSnapshot.child("track");
                 SpotMarker spotMarker = new SpotMarker(mMap,
-                        Integer.valueOf(key),
+                        key,
                         track.child("name").getValue().toString(),
                         track.child("id").getValue().toString(),
                         track.child("artistName").getValue().toString(),
