@@ -338,7 +338,7 @@ public class MapsActivity extends FragmentActivity implements
         String unixTimeId = String.valueOf(new Date().getTime());
 
         DatabaseReference base = spots.child(unixTimeId);
-        base.child("track").child("id").setValue(trackId);
+        base.child("track-id").setValue(trackId);
 
         Map<String, Object> locMap = new HashMap<>();
         locMap.put("lat", pos.latitude);
