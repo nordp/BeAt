@@ -326,6 +326,11 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     private void addSongToCurrentLocation(TrackInfo track) {
+        if (mLastPosition == null) {
+            Log.e("MapsActivity", "No location available! Presumably since it's running in the emulator?!");
+            return;
+        }
+
         LatLng pos = new LatLng(mLastPosition.latitude, mLastPosition.longitude);
         String trackUri = track.trackUri;
         String trackId = trackUri.split(":")[2];
