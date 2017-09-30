@@ -10,12 +10,14 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.media.AudioManager;
 import android.os.Handler;
+import android.media.Image;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
@@ -410,6 +412,8 @@ public class MapsActivity extends FragmentActivity implements
     public void loginButtonPressed(View view){
         Log.d("LOGGED", "loginButtonPressed: WorkS!!");
         view.setVisibility(View.INVISIBLE);
+        ImageView imageView = (ImageView) findViewById(R.id.gradientImageView);
+        imageView.setAlpha(0.2f);
     }
 
     @Override
