@@ -21,6 +21,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
@@ -191,10 +192,12 @@ public class MapsActivity extends FragmentActivity implements
 
     private void updateCurrentLocationMarker(LatLng currentPosition) {
         if (mCurrentPositionMarker == null) {
+            BitmapDescriptor bitmap = BitmapDescriptorFactory.fromResource(R.drawable.user_position_small);
             final MarkerOptions currentPosMarker = new MarkerOptions()
                     .position(currentPosition)
                     .flat(true)
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+                    .icon(bitmap)
+                    .anchor(0.5f, 0.5f);
             mCurrentPositionMarker = mMap.addMarker(currentPosMarker);
         } else {
             mCurrentPositionMarker.setPosition(currentPosition);
@@ -244,7 +247,9 @@ public class MapsActivity extends FragmentActivity implements
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
             @Override
             public void onCameraMove() {
-                geoQuery.setRadius(getVisibleRegion());
+                if (geoQuery != null) {
+                    geoQuery.setRadius(getVisibleRegion());
+                }
             }
         });
 
