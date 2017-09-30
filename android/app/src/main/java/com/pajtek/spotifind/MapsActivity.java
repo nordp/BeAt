@@ -11,12 +11,16 @@ import android.util.Log;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.Arrays;
@@ -28,11 +32,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private final static int REQUEST_LOCATION_CODE = 0x00000001;
     private final static int FETCH_LOCATION_EVERY_X_MS = 5_000;
 
+    private final static float MAP_DEFAULT_ZOOM = 16.0f;
+
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationClient;
 
-    // Updated regularly
-    Location currentLocation = null;
+    private Marker mCurrentPositionMarker;
+    Location mLastLocation = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,9 +49,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        boolean canFetchLocationNow = setupLocationServices();
-        if (canFetchLocationNow) {
-            // To be a bit responsive when opening the app
+        boolean canFetchNow = setupLocationServices();
+        if (canFetchNow) {
+            // Make sure we get a position as quickly as possible so the app can "begin"
             fetchCurrentLocation();
         }
         new Timer().scheduleAtFixedRate(new TimerTask() {
@@ -80,9 +86,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mFusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
-                currentLocation = location;
-                currentLocationUpdated(location);
-                Log.d("MapsActivity", "New location fetched: " + location.toString());
+                if (location != null) {
+                    currentLocationUpdated(location);
+                    Log.d("MapsActivity", "New location fetched: " + location.toString());
+                } else {
+                    Log.d("MapsActivity", "New location fetched, but from emulator so it's null.");
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e("MapsActivity", "Can't fetch location!");
             }
         });
     }
@@ -90,16 +104,51 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == REQUEST_LOCATION_CODE) {
-            if (Arrays.asList(permissions).contains(Manifest.permission.ACCESS_FINE_LOCATION) && Arrays.asList(permissions).contains(Manifest.permission.ACCESS_COARSE_LOCATION)) {
-                // Permission granted
+            if (!Arrays.asList(permissions).contains(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                // TODO: Handle the case if the user doesn't give permission!
             }
         }
     }
 
     private void currentLocationUpdated(Location location) {
+
+        if (mMap == null) {
+            Log.d("MapsActivity", "Can't set markers etc. since maps isn't initialized yet!");
+            return;
+        }
+
+        LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
+
+        updateCurrentLocationMarker(position);
+
+
+
+        // First location update
+        if (mLastLocation == null) {
+
+            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, MAP_DEFAULT_ZOOM);
+            mMap.animateCamera(cameraUpdate);
+
+        }
+
         // TODO
         // TODO Here we can do stuff like query for the next applicable song etc.
         // TODO
+
+        mLastLocation = location;
+    }
+
+    private void updateCurrentLocationMarker(LatLng currentPosition) {
+        if (mCurrentPositionMarker == null) {
+            final MarkerOptions currentPosMarker = new MarkerOptions()
+                    .position(currentPosition)
+                    .flat(true)
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+            mCurrentPositionMarker = mMap.addMarker(currentPosMarker);
+        } else {
+            mCurrentPositionMarker.setPosition(currentPosition);
+        }
     }
 
 
@@ -115,10 +164,5 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 }
