@@ -15,13 +15,13 @@ admin.initializeApp(functions.config().firebase);
 exports.addSpot = functions.database
 .ref('spots/{spotId}/loc')
 .onCreate(event => {
-    loc = event.data.val()
+    var loc = event.data.val()
 
-    lat = loc.lat;
-    lon = loc.lon;
+    var lat = loc.lat;
+    var lon = loc.lon;
 
-    geoFire = new GeoFire(admin.database().ref("/geofire"));
-    location = [lat,lon];
+    var geoFire = new GeoFire(admin.database().ref("/geofire"));
+    var location = [lat,lon];
     return new Promise((resolve, reject) => {
         resolve(geoFire.set(event.params.spotId, location));
     });
@@ -44,7 +44,7 @@ exports.removeSpot = functions.database
 });
 
 exports.fetchSongData = functions.database
-.ref('spots/{spotId}/track/id')
+.ref('spots/{spotId}/track-id')
 .onCreate(event => {
     var client_id = fs.readFileSync('PUBLIC_KEY', 'utf8');
     var client_secret = fs.readFileSync('SECRET_KEY', 'utf8');
@@ -84,10 +84,12 @@ exports.fetchSongData = functions.database
               
 
               var track = event.data.ref.parent;
-              
-              track.child('albumCoverWebUrl').set(info.album.images[1].url)
-              track.child('artistName').set(info.artists[0].name)
-              resolve(track.child('name').set(info.name));
+              resolve(track.set({
+                'name': info.name,
+                'artistName': info.artists[0].name,
+                'albumCoverWebUrl': info.album.images[1].url
+              }
+            ));
             } else {
               console.log("Error:" + err)
               reject(err)
