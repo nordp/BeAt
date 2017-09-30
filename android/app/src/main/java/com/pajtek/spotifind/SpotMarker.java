@@ -28,10 +28,10 @@ class SpotMarker {
 
     MarkerOptions customMarker;
 
-    SpotMarker(final GoogleMap mMap, int spotKey, String trackName, String trackUri, String artistName, final String albumCoverWebUrl, final LatLng latLng) {
+    SpotMarker(final GoogleMap mMap, int spotKey, String trackName, String trackId, String artistName, final String albumCoverWebUrl, final LatLng latLng) {
         this.spotKey = spotKey;
         this.trackName = trackName;
-        this.trackUri = trackUri;
+        this.trackUri = "spotify:track:" + trackId;
         this.artistName = artistName;
         this.customMarker =  new MarkerOptions().position(latLng).flat(false);
         new ImageLoader() {

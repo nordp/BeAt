@@ -467,7 +467,7 @@ public class MapsActivity extends FragmentActivity implements
                 SpotMarker spotMarker = new SpotMarker(mMap,
                         Integer.valueOf(key),
                         track.child("name").getValue().toString(),
-                        track.child("uri").getValue().toString(),
+                        track.child("id").getValue().toString(),
                         track.child("artistName").getValue().toString(),
                         track.child("albumCoverWebUrl").getValue().toString(),
                         new LatLng(location.latitude,location.longitude));
