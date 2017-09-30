@@ -3,6 +3,7 @@ package com.pajtek.spotifind;
 import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
@@ -123,15 +124,6 @@ public class MapsActivity extends FragmentActivity implements
                 fetchCurrentLocation();
             }
         }, FETCH_LOCATION_EVERY_X_MS, FETCH_LOCATION_EVERY_X_MS);
-
-        // Authenticate Spotify
-        {
-            AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(SPOTIFY_CLIENT_ID, AuthenticationResponse.Type.TOKEN, SPOTIFY_REDIRECT_URI);
-            builder.setScopes(new String[]{"streaming", "user-read-birthdate", "user-read-email", "user-read-private", "user-top-read"});
-            AuthenticationRequest request = builder.build();
-
-            AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
-        }
     }
 
     @Override
@@ -482,6 +474,12 @@ public class MapsActivity extends FragmentActivity implements
         Log.d("MapsActivity", "Access token: " + this.mSpotifyAccessToken);
         fetchLastPlayedTracks(this.mSpotifyAccessToken);
 
+        // Fade out green tint when logged in
+        ImageView imageView = (ImageView) findViewById(R.id.gradientImageView);
+        ObjectAnimator alphaAnimator = ObjectAnimator.ofFloat(imageView, "alpha", 0.2f);
+        alphaAnimator.setDuration(2_000);
+        alphaAnimator.start();
+
         /*
         fadeInSong("spotify:track:2TpxZ7JUBn3uw46aR7qd6V");
         new Timer().schedule(new TimerTask() {
@@ -510,9 +508,18 @@ public class MapsActivity extends FragmentActivity implements
 
     public void loginButtonPressed(View view){
         Log.d("LOGGED", "loginButtonPressed: WorkS!!");
+
+        // Authenticate Spotify
+        {
+            AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(SPOTIFY_CLIENT_ID, AuthenticationResponse.Type.TOKEN, SPOTIFY_REDIRECT_URI);
+            builder.setScopes(new String[]{"streaming", "user-read-birthdate", "user-read-email", "user-read-private", "user-top-read"});
+            AuthenticationRequest request = builder.build();
+
+            AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
+        }
+
         view.setVisibility(View.INVISIBLE);
-        ImageView imageView = (ImageView) findViewById(R.id.gradientImageView);
-        imageView.setAlpha(0.2f);
+        // Fade out green tint when logged in! (in callback later)
     }
 
     @Override
