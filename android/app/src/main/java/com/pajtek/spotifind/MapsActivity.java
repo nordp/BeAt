@@ -15,6 +15,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
@@ -404,6 +405,11 @@ public class MapsActivity extends FragmentActivity implements
     @Override
     public void onTemporaryError() {
         Log.d("MainActivity", "Temporary error occurred");
+    }
+
+    public void loginButtonPressed(View view){
+        Log.d("LOGGED", "loginButtonPressed: WorkS!!");
+        view.setVisibility(View.INVISIBLE);
     }
 
     @Override

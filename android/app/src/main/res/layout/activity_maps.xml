@@ -8,15 +8,22 @@
     tools:context="com.pajtek.spotifind.MapsActivity"
     android:background="#000">
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="1"
+        android:layout_gravity="center_vertical|center_horizontal"
+        android:src="@drawable/gradient"/>
+
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
         android:layout_gravity="center_vertical|center_horizontal"
         android:adjustViewBounds="true"
         android:background="?android:attr/panelBackground"
+        android:onClick="loginButtonPressed"
         android:scaleType="fitCenter"
-        android:src="@drawable/connect_button" />
+        android:src="@drawable/connect_button"/>
 
 
 </fragment>
