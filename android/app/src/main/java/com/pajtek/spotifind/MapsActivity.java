@@ -1,9 +1,15 @@
 package com.pajtek.spotifind;
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.media.AudioManager;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -38,6 +44,7 @@ import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.spotify.sdk.android.player.Config;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
 import com.spotify.sdk.android.player.Error;
+import com.spotify.sdk.android.player.Player;
 import com.spotify.sdk.android.player.PlayerEvent;
 import com.spotify.sdk.android.player.Spotify;
 import com.spotify.sdk.android.player.SpotifyPlayer;
@@ -63,6 +70,7 @@ public class MapsActivity extends FragmentActivity implements
     private final static int FETCH_LOCATION_EVERY_X_MS = 5_000;
 
     private final static float MAP_DEFAULT_ZOOM = 16.0f;
+    private final static long FADE_IN_OUT_TIME_MS = 3_000;
 
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationClient;
@@ -266,6 +274,87 @@ public class MapsActivity extends FragmentActivity implements
     // Spotify lifecycle stuff
     //
 
+    private void fadeInSong(final String trackId) {
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                if (mSpotifyPlayer.getPlaybackState().isPlaying) {
+                    // If currently playing, fade out, then change song and fade in
+
+                    ValueAnimator vaOut = ValueAnimator.ofFloat(1.0f, 0.0f);
+                    vaOut.setDuration(FADE_IN_OUT_TIME_MS);
+                    vaOut.setRepeatCount(0);
+                    vaOut.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                        public void onAnimationUpdate(ValueAnimator animation) {
+                            float animatedVolume = (float)animation.getAnimatedValue();
+                            setSpotifyPlayerVolume(animatedVolume);
+                        }
+                    });
+                    vaOut.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+
+                            mSpotifyPlayer.playUri(null, trackId, 0, 0);
+
+                            ValueAnimator vaIn = ValueAnimator.ofFloat(0.0f, 1.0f);
+                            vaIn.setDuration(FADE_IN_OUT_TIME_MS);
+                            vaIn.setRepeatCount(0);
+                            vaIn.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                                public void onAnimationUpdate(ValueAnimator animation) {
+                                    float animatedVolume = (float)animation.getAnimatedValue();
+                                    setSpotifyPlayerVolume(animatedVolume);
+                                }
+                            });
+                            vaIn.start();
+
+                        }
+                    });
+                    vaOut.start();
+                } else {
+                    // If NOT currently playing, change song and fade in
+
+                    setSpotifyPlayerVolume(0.0f);
+                    mSpotifyPlayer.playUri(new Player.OperationCallback() {
+                        @Override
+                        public void onSuccess() {
+
+                            Log.e("MapsActivity", "Playing new song!");
+                            ValueAnimator vaIn = ValueAnimator.ofFloat(0.0f, 1.0f);
+                            vaIn.setDuration(FADE_IN_OUT_TIME_MS);
+                            vaIn.setRepeatCount(0);
+                            vaIn.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                                public void onAnimationUpdate(ValueAnimator animation) {
+                                    float animatedVolume = (float)animation.getAnimatedValue();
+                                    setSpotifyPlayerVolume(animatedVolume);
+                                }
+                            });
+                            vaIn.start();
+
+                        }
+
+                        @Override
+                        public void onError(Error error) {
+                            Log.e("MapsActivity", "Can't play Spotify URI");
+                        }
+
+                    }, trackId, 0, 0);
+
+                }
+
+            }
+        });
+    }
+
+    private void setSpotifyPlayerVolume(float volume) {
+        final AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        final int maxVolume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+
+        int volumeToSet = (int)((float)maxVolume * volume);
+        am.setStreamVolume(AudioManager.STREAM_MUSIC, volumeToSet, 0);
+    }
+
     @Override
     public void onPlaybackEvent(PlayerEvent playerEvent) {
         Log.d("MainActivity", "Playback event received: " + playerEvent.name());
@@ -288,10 +377,18 @@ public class MapsActivity extends FragmentActivity implements
 
     @Override
     public void onLoggedIn() {
+        Log.d("MainActivity", "User logged in");
 
-        // TODO: This is the line that plays a song.
-        mSpotifyPlayer.playUri(null, "spotify:track:2TpxZ7JUBn3uw46aR7qd6V", 0, 0);
-
+        //
+        // TODO: Move this to where relevant!
+        //
+        fadeInSong("spotify:track:2TpxZ7JUBn3uw46aR7qd6V");
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                fadeInSong("spotify:track:5WSdMcWTKRdN1QYVJHJWxz");
+            }
+        }, 10_000);
     }
 
     @Override
