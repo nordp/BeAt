@@ -592,8 +592,7 @@ public class MapsActivity extends FragmentActivity implements
         spots.child(key).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d("MapsActivity", dataSnapshot.child("track").getValue().toString());
-                DataSnapshot track = dataSnapshot.child("track");
+                DataSnapshot track = dataSnapshot.child("track-info");
                 SpotMarker spotMarker = new SpotMarker(mMap,
                         key,
                         track.child("name").getValue().toString(),
