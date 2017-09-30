@@ -7,3 +7,7 @@
 /build
 /captures
 .externalNativeBuild
+android/.idea/libraries/
+android/.idea/workspace.xml
+android/build/
+android/local.properties
