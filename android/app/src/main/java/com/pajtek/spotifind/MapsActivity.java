@@ -7,18 +7,12 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.media.AudioManager;
-import android.os.AsyncTask;
-import android.os.Handler;
-import android.media.Image;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.util.JsonReader;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -58,7 +52,6 @@ import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.spotify.sdk.android.player.Config;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
 import com.spotify.sdk.android.player.Error;
-import com.spotify.sdk.android.player.Metadata;
 import com.spotify.sdk.android.player.Player;
 import com.spotify.sdk.android.player.PlayerEvent;
 import com.spotify.sdk.android.player.Spotify;
@@ -72,12 +65,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -102,7 +89,7 @@ public class MapsActivity extends FragmentActivity implements
     private final static int FETCH_LOCATION_EVERY_X_MS = 5_000;
 
     private final static float MAP_DEFAULT_ZOOM = 16.0f;
-    private final static long FADE_IN_OUT_TIME_MS = 3_000;
+    private final static long FADE_IN_OUT_TIME_MS = 500;
 
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationClient;
@@ -112,7 +99,7 @@ public class MapsActivity extends FragmentActivity implements
     private GeoQuery geoQuery;
 
     private Marker mCurrentPositionMarker;
-    Location mLastLocation = null;
+    LatLng mLastPosition = null;
 
 
 
@@ -212,16 +199,11 @@ public class MapsActivity extends FragmentActivity implements
 
         updateCurrentLocationMarker(position);
 
-
-
-
         // First location update
-        if (mLastLocation == null) {
-
-            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, MAP_DEFAULT_ZOOM);
+        if (mLastPosition == null) {
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(position, MAP_DEFAULT_ZOOM);
             mMap.animateCamera(cameraUpdate);
-            initGeoFire(latLng);
+            initGeoFire(position);
         }
 
         geoQuery.setCenter(new GeoLocation(position.latitude,position.longitude));
@@ -230,7 +212,7 @@ public class MapsActivity extends FragmentActivity implements
         // TODO Here we can do stuff like query for the next applicable song etc.
         // TODO
 
-        mLastLocation = location;
+        mLastPosition = position;
     }
 
     private void updateCurrentLocationMarker(LatLng currentPosition) {
@@ -278,7 +260,7 @@ public class MapsActivity extends FragmentActivity implements
     private void fetchLastPlayedTracks(final String accessToken) {
 
         class SpotifyRequest extends JsonObjectRequest {
-            public SpotifyRequest(int method, String url, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+            private SpotifyRequest(int method, String url, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
                 super(method, url, jsonRequest, listener, errorListener);
             }
 
@@ -287,7 +269,6 @@ public class MapsActivity extends FragmentActivity implements
                 Map<String, String> headers = new HashMap<>();
                 headers.put("Content-Type", "application/json");
                 headers.put("Authorization", "Bearer " + accessToken);
-                //headers.put("Authorization", "Bearer BQDv6qYC3tKUtVqnq37TtFw8IZvPyboEDi24iDs1SqLmvliUWfMKj6_e9R-P2SY8kRLJ7vJdsU9e4FanSm3lnfO4HWeQX0rl-L9gAtExwhY2pXEGyaWe4pI7vatE-db9navZylbVhYrTCFNL97ZDg6J47cjems67puY");// + accessToken);
                 return headers;
             }
         }
@@ -343,6 +324,14 @@ public class MapsActivity extends FragmentActivity implements
         Log.d("MapsActivity", mUserTopTracks.toString());
     }
 
+    private void addSongToCurrentLocation(TrackInfo track) {
+        LatLng pos = new LatLng(mLastPosition.latitude, mLastPosition.longitude);
+        String trackUri = track.trackUri;
+
+        // TODO: Push to database!
+        //spots.setValue()
+    }
+
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -377,6 +366,8 @@ public class MapsActivity extends FragmentActivity implements
 
     private void fadeInSong(final String trackId) {
 
+        final float targetMaxVolume = getSpotifyPlayerVolume();
+
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -384,7 +375,7 @@ public class MapsActivity extends FragmentActivity implements
                 if (mSpotifyPlayer.getPlaybackState().isPlaying) {
                     // If currently playing, fade out, then change song and fade in
 
-                    ValueAnimator vaOut = ValueAnimator.ofFloat(1.0f, 0.0f);
+                    ValueAnimator vaOut = ValueAnimator.ofFloat(targetMaxVolume, 0.0f);
                     vaOut.setDuration(FADE_IN_OUT_TIME_MS);
                     vaOut.setRepeatCount(0);
                     vaOut.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -399,7 +390,7 @@ public class MapsActivity extends FragmentActivity implements
 
                             mSpotifyPlayer.playUri(null, trackId, 0, 0);
 
-                            ValueAnimator vaIn = ValueAnimator.ofFloat(0.0f, 1.0f);
+                            ValueAnimator vaIn = ValueAnimator.ofFloat(0.0f, targetMaxVolume);
                             vaIn.setDuration(FADE_IN_OUT_TIME_MS);
                             vaIn.setRepeatCount(0);
                             vaIn.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -422,7 +413,7 @@ public class MapsActivity extends FragmentActivity implements
                         public void onSuccess() {
 
                             Log.e("MapsActivity", "Playing new song!");
-                            ValueAnimator vaIn = ValueAnimator.ofFloat(0.0f, 1.0f);
+                            ValueAnimator vaIn = ValueAnimator.ofFloat(0.0f, targetMaxVolume);
                             vaIn.setDuration(FADE_IN_OUT_TIME_MS);
                             vaIn.setRepeatCount(0);
                             vaIn.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -456,6 +447,14 @@ public class MapsActivity extends FragmentActivity implements
         am.setStreamVolume(AudioManager.STREAM_MUSIC, volumeToSet, 0);
     }
 
+    private float getSpotifyPlayerVolume() {
+        final AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        final int maxVolume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        int volume = am.getStreamVolume(AudioManager.STREAM_MUSIC);
+
+        return (float)volume / (float)maxVolume;
+    }
+
     @Override
     public void onPlaybackEvent(PlayerEvent playerEvent) {
         Log.d("MainActivity", "Playback event received: " + playerEvent.name());
@@ -483,9 +482,7 @@ public class MapsActivity extends FragmentActivity implements
         Log.d("MapsActivity", "Access token: " + this.mSpotifyAccessToken);
         fetchLastPlayedTracks(this.mSpotifyAccessToken);
 
-        //
-        // TODO: Move this to where relevant!
-        //
+        /*
         fadeInSong("spotify:track:2TpxZ7JUBn3uw46aR7qd6V");
         new Timer().schedule(new TimerTask() {
             @Override
@@ -493,6 +490,7 @@ public class MapsActivity extends FragmentActivity implements
                 fadeInSong("spotify:track:5WSdMcWTKRdN1QYVJHJWxz");
             }
         }, 10_000);
+        */
     }
 
     @Override
