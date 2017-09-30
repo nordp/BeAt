@@ -1,1 +1,5 @@
 /node_modules/
+
+# Keep private!
+PUBLIC_KEY
+SECRET_KEY
