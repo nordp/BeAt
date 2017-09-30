@@ -36,11 +36,15 @@ dependencies {
     compile 'com.spotify.sdk:spotify-android-auth-1.0.0@aar'
     // This library handles music playback
     compile 'com.spotify.sdk:spotify-player-24-noconnect-2.20b@aar'
+    // Firebase core
+    compile 'com.google.firebase:firebase-core:11.4.0'
     // GeoFire for supporting location based queries in Firebase
     compile 'com.firebase:geofire-android:2.1.2'
 
+    compile 'com.google.android.gms:play-services-location:11.4.0'
+
     compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.google.android.gms:play-services-maps:11.0.4'
+    compile 'com.google.android.gms:play-services-maps:11.4.0'
     testCompile 'junit:junit:4.12'
 }
 
