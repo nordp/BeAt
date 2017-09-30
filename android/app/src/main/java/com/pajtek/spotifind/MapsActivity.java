@@ -357,14 +357,13 @@ public class MapsActivity extends FragmentActivity implements
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d("MapsActivity", dataSnapshot.child("track").getValue().toString());
                 DataSnapshot track = dataSnapshot.child("track");
-                SpotMarker spotMarker = new SpotMarker(
+                SpotMarker spotMarker = new SpotMarker(mMap,
                         Integer.valueOf(key),
                         track.child("name").getValue().toString(),
                         track.child("uri").getValue().toString(),
                         track.child("artistName").getValue().toString(),
                         track.child("albumCoverWebUrl").getValue().toString(),
                         new LatLng(location.latitude,location.longitude));
-                mMap.addMarker(spotMarker.customMarker);
             }
 
             @Override

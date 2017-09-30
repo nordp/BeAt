@@ -5,22 +5,13 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.spotify.sdk.android.player.Metadata;
-import com.spotify.sdk.android.player.Metadata.Track;
-import com.spotify.sdk.android.player.Spotify;
-
-import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
-
-import javax.net.ssl.HttpsURLConnection;
 
 /**
  * Created by Phnor on 2017-09-30.
@@ -37,16 +28,18 @@ class SpotMarker {
 
     MarkerOptions customMarker;
 
-    SpotMarker(int spotKey, String trackName, String trackUri, String artistName, final String albumCoverWebUrl, final LatLng latLng) {
+    SpotMarker(final GoogleMap mMap, int spotKey, String trackName, String trackUri, String artistName, final String albumCoverWebUrl, final LatLng latLng) {
         this.spotKey = spotKey;
         this.trackName = trackName;
         this.trackUri = trackUri;
         this.artistName = artistName;
-        this.customMarker =  new MarkerOptions().position(latLng).flat(true);
+        this.customMarker =  new MarkerOptions().position(latLng).flat(false);
         new ImageLoader() {
             @Override
             protected void onPostExecute(Bitmap bmp) {
                 customMarker = customMarker.icon(BitmapDescriptorFactory.fromBitmap(bmp));
+                mMap.addMarker(customMarker);
+                Log.e("SpotMarker", "Marker added");
             }
         }.execute(albumCoverWebUrl);
     }
@@ -61,12 +54,11 @@ class SpotMarker {
 
         @Override
         protected Bitmap doInBackground(String... params) {
-
             try {
                 URL url = new URL(params[0]);
                 return BitmapFactory.decodeStream(url.openConnection().getInputStream());
             } catch(IOException e) {
-                Log.d("SpotMarker",e.toString());
+                Log.e("SpotMarker","ERROR LOADING BITMAP" + e.toString());
                 return null;
             }
         }
