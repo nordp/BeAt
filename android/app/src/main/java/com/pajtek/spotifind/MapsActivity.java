@@ -636,18 +636,18 @@ public class MapsActivity extends FragmentActivity implements
     private void removeSpotMarker(String key) {
         //TODO Remove marker from mMap
     }
-//SpotMarker(int spotKey, String trackName, String trackUri, String artistName, String albumCoverWebUrl, LatLng latLng)
+
     private void addSpotMarker(final String key, final GeoLocation location) {
-        spots.child(key).addListenerForSingleValueEvent(new ValueEventListener() {
+        spots.child(key).child("info").addListenerForSingleValueEvent(new ValueEventListener() {
+
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                DataSnapshot info = dataSnapshot.child("info");
                 SpotMarker spotMarker = new SpotMarker(mMap,
                         key,
-                        info.child("name").getValue().toString(),
-                        dataSnapshot.child("trackId").toString(),
-                        info.child("artistName").getValue().toString(),
-                        info.child("albumCoverWebUrl").getValue().toString(),
+                        dataSnapshot.child("name").getValue().toString(),
+                        dataSnapshot.child("trackId").getValue().toString(),
+                        dataSnapshot.child("artistName").getValue().toString(),
+                        dataSnapshot.child("albumCoverWebUrl").getValue().toString(),
                         new LatLng(location.latitude,location.longitude));
             }
 
