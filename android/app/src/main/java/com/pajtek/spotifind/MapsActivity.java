@@ -68,12 +68,15 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static com.pajtek.spotifind.R.id.map;
 import static com.spotify.sdk.android.authentication.LoginActivity.REQUEST_CODE;
 
 public class MapsActivity extends FragmentActivity implements
@@ -111,7 +114,7 @@ public class MapsActivity extends FragmentActivity implements
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+                .findFragmentById(map);
         mapFragment.getMapAsync(this);
 
         boolean canFetchNow = setupLocationServices();
@@ -317,14 +320,22 @@ public class MapsActivity extends FragmentActivity implements
 
     private void topTracksLoaded() {
         Log.d("MapsActivity", mUserTopTracks.toString());
+
+        TrackInfo track = mUserTopTracks.get(new Random().nextInt(mUserTopTracks.size()));
+        addSongToCurrentLocation(track);
     }
 
     private void addSongToCurrentLocation(TrackInfo track) {
         LatLng pos = new LatLng(mLastPosition.latitude, mLastPosition.longitude);
         String trackUri = track.trackUri;
+        String trackId = trackUri.split(":")[2];
 
-        // TODO: Push to database!
-        //spots.setValue()
+        String unixTimeId = String.valueOf(new Date().getTime());
+
+        DatabaseReference base = spots.child(unixTimeId);
+        base.child("id").setValue(trackId);
+        base.child("loc").child("lat").setValue(pos.latitude);
+        base.child("loc").child("lon").setValue(pos.longitude);
     }
 
     /**
