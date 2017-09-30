@@ -10,6 +10,10 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.GeoQuery;
+import com.firebase.geofire.GeoQueryEventListener;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdate;
@@ -22,6 +26,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.VisibleRegion;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
@@ -33,6 +38,10 @@ import com.spotify.sdk.android.player.Error;
 import com.spotify.sdk.android.player.PlayerEvent;
 import com.spotify.sdk.android.player.Spotify;
 import com.spotify.sdk.android.player.SpotifyPlayer;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.maps.android.SphericalUtil;
 
 import java.util.Arrays;
 import java.util.Timer;
@@ -55,8 +64,13 @@ public class MapsActivity extends FragmentActivity implements
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationClient;
 
+    GeoFire geoFire = new GeoFire(FirebaseDatabase.getInstance().getReference("/geofire"));
+    private GeoQuery geoQuery;
+
     private Marker mCurrentPositionMarker;
     Location mLastLocation = null;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,14 +170,17 @@ public class MapsActivity extends FragmentActivity implements
 
 
 
+
         // First location update
         if (mLastLocation == null) {
 
             LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, MAP_DEFAULT_ZOOM);
             mMap.animateCamera(cameraUpdate);
-
+            initGeoFire(latLng);
         }
+
+        geoQuery.setCenter(new GeoLocation(position.latitude,position.longitude));
 
         // TODO
         // TODO Here we can do stuff like query for the next applicable song etc.
@@ -224,6 +241,13 @@ public class MapsActivity extends FragmentActivity implements
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
+            @Override
+            public void onCameraMove() {
+                geoQuery.setRadius(getVisibleRegion());
+            }
+        });
+
         boolean success = mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style));
         if (!success) {
             Log.e("MapsActivity", "Could not set the map style!");
@@ -282,4 +306,49 @@ public class MapsActivity extends FragmentActivity implements
         Log.d("MainActivity", "Received connection message: " + message);
     }
 
+    private void initGeoFire(LatLng latLng) {
+        geoQuery = geoFire.queryAtLocation(new GeoLocation(latLng.latitude, latLng.longitude), getVisibleRegion());
+        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+            @Override
+            public void onKeyEntered(String key, GeoLocation location) {
+                addSpotMarker(key, location);
+            }
+
+            @Override
+            public void onKeyExited(String key) {
+                removeSpotMarker(key);
+            }
+
+            @Override
+            public void onKeyMoved(String key, GeoLocation location) {
+                //Inte särskilt troligt
+            }
+
+            @Override
+            public void onGeoQueryReady() {
+                //???
+            }
+
+            @Override
+            public void onGeoQueryError(DatabaseError error) {
+                Log.d("MapsActivity", error.toString());
+            }
+        });
+    }
+
+    private void removeSpotMarker(String key) {
+        //TODO Fetch spotify data
+        //TODO Instantiate and populate mMap
+    }
+
+    private void addSpotMarker(String key, GeoLocation location) {
+        //TODO Remove spot from mMap
+    }
+
+    //UTIL
+    private double getVisibleRegion() {
+        //Calculate the current visible region
+        VisibleRegion visibleRegion = mMap.getProjection().getVisibleRegion();
+        return SphericalUtil.computeDistanceBetween(visibleRegion.farLeft, mMap.getCameraPosition().target);
+    }
 }
