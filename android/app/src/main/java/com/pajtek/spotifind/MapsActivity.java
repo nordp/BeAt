@@ -12,8 +12,12 @@ import android.location.Location;
 import android.media.AudioManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.view.ViewPager;
+import android.util.AttributeSet;
+import android.util.JsonReader;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -61,11 +65,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.maps.android.SphericalUtil;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -75,7 +77,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-
+import pl.bclogic.pulsator4droid.library.PulsatorLayout;
 import static com.pajtek.spotifind.R.id.map;
 import static com.spotify.sdk.android.authentication.LoginActivity.REQUEST_CODE;
 
@@ -105,6 +107,8 @@ public class MapsActivity extends FragmentActivity implements
 
     private Marker mCurrentPositionMarker;
     LatLng mLastPosition = null;
+    Location mLastLocation = null;
+    private PulsatorLayout pulsatorLayout;
 
 
 
@@ -130,6 +134,33 @@ public class MapsActivity extends FragmentActivity implements
         }, FETCH_LOCATION_EVERY_X_MS, FETCH_LOCATION_EVERY_X_MS);
 
         // TODO If the user is already "logged in", just remove the log in button & stuff. But maybe not required for this app right now?
+
+        // Authenticate Spotify
+        {
+            AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(SPOTIFY_CLIENT_ID, AuthenticationResponse.Type.TOKEN, SPOTIFY_REDIRECT_URI);
+            builder.setScopes(new String[]{"streaming", "user-read-birthdate", "user-read-email", "user-read-private", "user-top-read"});
+            AuthenticationRequest request = builder.build();
+
+            AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
+        }
+
+        pulseSetup();
+
+
+
+    }
+
+    private void pulseSetup(){
+        pulsatorLayout = (PulsatorLayout) findViewById(R.id.pulsator1);
+        //pulsatorLayout = new PulsatorLayout(this);
+        pulsatorLayout.setX(300f);
+        pulsatorLayout.setY(300f);
+        pulsatorLayout.setVisibility(View.VISIBLE);
+        pulsatorLayout.setCount(4);
+        pulsatorLayout.setDuration(7000);
+        pulsatorLayout.start();
+
+
     }
 
     @Override
@@ -365,6 +396,7 @@ public class MapsActivity extends FragmentActivity implements
                 if (geoQuery != null && mSpotifyLoggedIn) {
                     geoQuery.setRadius(getVisibleRegion());
                 }
+                replaceAnimation();
             }
         });
 
@@ -544,6 +576,23 @@ public class MapsActivity extends FragmentActivity implements
 
         view.setVisibility(View.INVISIBLE);
         // Fade out green tint when logged in! (in callback later)
+
+        ImageView imageView = (ImageView) findViewById(R.id.gradientImageView);
+        imageView.setAlpha(0.2f);
+        pulsatorLayout.setX(700f);
+        pulsatorLayout.setY(700f);
+    }
+    public void debugButtonPressed(View view){
+        Log.d("LOGGED", mMap.getCameraPosition().target.toString());
+    }
+
+    private void replaceAnimation(){
+        float lat = (float) mMap.getCameraPosition().target.latitude;
+        float lon = (float) mMap.getCameraPosition().target.longitude;
+
+        Log.d("LOGGED", String.valueOf(lat) + String.valueOf(lon));
+        pulsatorLayout.setX(lon);
+        pulsatorLayout.setY(lat);
     }
 
     @Override
