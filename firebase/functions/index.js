@@ -44,11 +44,8 @@ exports.removeSpot = functions.database
 });
 
 exports.fetchSongData = functions.database
-.ref('spots/{spotId}/track-id')
+.ref('spots/{spotId}/track/id')
 .onCreate(event => {
-
-  return new Promise((resolve, reject) => {
-
     var client_id = fs.readFileSync('PUBLIC_KEY', 'utf8');
     var client_secret = fs.readFileSync('SECRET_KEY', 'utf8');
     var authHeader = 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64'));
@@ -62,17 +59,44 @@ exports.fetchSongData = functions.database
       json: true
     };
 
-    request.post(authOptions, function(error, response, body) {
-      if (!error && response.statusCode === 200) {
-        var accessToken = body.access_token;
+    return new Promise((resolve, reject) => {
+      request.post(authOptions, function(error, response, body) {
+        if (!error && response.statusCode === 200) {
+          var accessToken = body.access_token;
+          console.log("access token retreived:" + accessToken)
+          console.log("eventData" + JSON.stringify(event.data))
+          var uri = JSON.stringify(event.data).substring(1,  JSON.stringify(event.data).length - 1);
+          var queryOptions = {
+            url: 'https://api.spotify.com/v1/tracks/' + uri,
+            headers: { 'Authorization': 'Bearer ' + accessToken },
+            form : {
+              market: 'ES'
+            },
+            json: true
+          }
 
-        // TODO: Do spotify stuff
+          console.log("queryOptions" + JSON.stringify(queryOptions))
 
-        resolve();
-      } else {
-        reject(error);
-      }
-    });
+          request.get(queryOptions, function(err, res) {
+            if (!err) {
+              console.log("Result: " + JSON.stringify(res.body));
+              var info = res.body;
+              
+
+              var track = event.data.ref.parent;
+              
+              track.child('albumCoverWebUrl').set(info.album.images[1].url)
+              track.child('artistName').set(info.artists[0].name)
+              resolve(track.child('name').set(info.name));
+            } else {
+              console.log("Error:" + err)
+              reject(err)
+            }
+          })
+        } else {
+          reject(error);
+        }
+      });
 
   });
 
