@@ -7,18 +7,29 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.media.AudioManager;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.media.Image;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.JsonReader;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
@@ -47,6 +58,7 @@ import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.spotify.sdk.android.player.Config;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
 import com.spotify.sdk.android.player.Error;
+import com.spotify.sdk.android.player.Metadata;
 import com.spotify.sdk.android.player.Player;
 import com.spotify.sdk.android.player.PlayerEvent;
 import com.spotify.sdk.android.player.Spotify;
@@ -56,7 +68,21 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.maps.android.SphericalUtil;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -68,6 +94,9 @@ public class MapsActivity extends FragmentActivity implements
     private final static String SPOTIFY_CLIENT_ID = "c55122e780414b7bbe93c5084097ac8f";
     private final static String SPOTIFY_REDIRECT_URI = "com.pajtek.spotifind://callback";
     private SpotifyPlayer mSpotifyPlayer;
+    private String mSpotifyAccessToken;
+
+    private List<TrackInfo> mUserTopTracks = new ArrayList<>();
 
     private final static int REQUEST_LOCATION_CODE = 0x00000001;
     private final static int FETCH_LOCATION_EVERY_X_MS = 5_000;
@@ -111,7 +140,7 @@ public class MapsActivity extends FragmentActivity implements
         // Authenticate Spotify
         {
             AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(SPOTIFY_CLIENT_ID, AuthenticationResponse.Type.TOKEN, SPOTIFY_REDIRECT_URI);
-            builder.setScopes(new String[]{"user-read-private", "streaming"});
+            builder.setScopes(new String[]{"streaming", "user-read-birthdate", "user-read-email", "user-read-private", "user-top-read"});
             AuthenticationRequest request = builder.build();
 
             AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
@@ -227,6 +256,7 @@ public class MapsActivity extends FragmentActivity implements
         if (requestCode == REQUEST_CODE) {
             AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
             if (response.getType() == AuthenticationResponse.Type.TOKEN) {
+                this.mSpotifyAccessToken = response.getAccessToken();
                 Config playerConfig = new Config(this, response.getAccessToken(), SPOTIFY_CLIENT_ID);
                 Spotify.getPlayer(playerConfig, this, new SpotifyPlayer.InitializationObserver() {
                     @Override
@@ -243,6 +273,74 @@ public class MapsActivity extends FragmentActivity implements
                 });
             }
         }
+    }
+
+    private void fetchLastPlayedTracks(final String accessToken) {
+
+        class SpotifyRequest extends JsonObjectRequest {
+            public SpotifyRequest(int method, String url, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+                super(method, url, jsonRequest, listener, errorListener);
+            }
+
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type", "application/json");
+                headers.put("Authorization", "Bearer " + accessToken);
+                //headers.put("Authorization", "Bearer BQDv6qYC3tKUtVqnq37TtFw8IZvPyboEDi24iDs1SqLmvliUWfMKj6_e9R-P2SY8kRLJ7vJdsU9e4FanSm3lnfO4HWeQX0rl-L9gAtExwhY2pXEGyaWe4pI7vatE-db9navZylbVhYrTCFNL97ZDg6J47cjems67puY");// + accessToken);
+                return headers;
+            }
+        }
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+        final String url = "https://api.spotify.com/v1/me/top/tracks?time_range=short_term&limit=10&offset=0";
+
+        JsonObjectRequest topTracksRequest = new SpotifyRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+
+                @Override
+                public void onResponse(JSONObject response) {
+                    try {
+
+                        JSONArray items = response.getJSONArray("items");
+                        for (int i = 0; i < items.length(); i++) {
+
+                            JSONObject trackObject = items.getJSONObject(i);
+                            JSONObject firstArtist = trackObject.getJSONArray("artists").getJSONObject(0);
+
+                            String artistName = firstArtist.getString("name");
+                            String trackName = trackObject.getString("name");
+                            String trackUri = trackObject.getString("uri");
+
+                            TrackInfo track = new TrackInfo(artistName, trackName, trackUri);
+                            mUserTopTracks.add(track);
+
+                        }
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                topTracksLoaded();
+                            }
+                        });
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.e("MapsActivity", "Can't parse or download the top tracks response JSON");
+                }
+            }
+        );
+
+        queue.add(topTracksRequest);
+    }
+
+    private void topTracksLoaded() {
+        Log.d("MapsActivity", mUserTopTracks.toString());
     }
 
     /**
@@ -380,7 +478,10 @@ public class MapsActivity extends FragmentActivity implements
 
     @Override
     public void onLoggedIn() {
-        Log.d("MainActivity", "User logged in");
+        Log.d("MapsActivity", "User logged in");
+
+        Log.d("MapsActivity", "Access token: " + this.mSpotifyAccessToken);
+        fetchLastPlayedTracks(this.mSpotifyAccessToken);
 
         //
         // TODO: Move this to where relevant!
