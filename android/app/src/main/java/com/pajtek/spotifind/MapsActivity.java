@@ -83,6 +83,7 @@ public class MapsActivity extends FragmentActivity implements
     private final static String SPOTIFY_REDIRECT_URI = "com.pajtek.spotifind://callback";
     private SpotifyPlayer mSpotifyPlayer;
     private String mSpotifyAccessToken;
+    private boolean mSpotifyLoggedIn = false;
 
     private List<TrackInfo> mUserTopTracks = new ArrayList<>();
 
@@ -124,6 +125,8 @@ public class MapsActivity extends FragmentActivity implements
                 fetchCurrentLocation();
             }
         }, FETCH_LOCATION_EVERY_X_MS, FETCH_LOCATION_EVERY_X_MS);
+
+        // TODO If the user is already "logged in", just remove the log in button & stuff. But maybe not required for this app right now?
     }
 
     @Override
@@ -182,8 +185,8 @@ public class MapsActivity extends FragmentActivity implements
 
     private void currentLocationUpdated(Location location) {
 
-        if (mMap == null) {
-            Log.d("MapsActivity", "Can't set markers etc. since maps isn't initialized yet!");
+        if (mMap == null && !mSpotifyLoggedIn) {
+            Log.d("MapsActivity", "Can't set markers etc. since maps isn't initialized yet and not yet logged in to Spotify!");
             return;
         }
 
@@ -340,7 +343,7 @@ public class MapsActivity extends FragmentActivity implements
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
             @Override
             public void onCameraMove() {
-                if (geoQuery != null) {
+                if (geoQuery != null && mSpotifyLoggedIn) {
                     geoQuery.setRadius(getVisibleRegion());
                 }
             }
@@ -470,6 +473,8 @@ public class MapsActivity extends FragmentActivity implements
     @Override
     public void onLoggedIn() {
         Log.d("MapsActivity", "User logged in");
+
+        mSpotifyLoggedIn = true;
 
         Log.d("MapsActivity", "Access token: " + this.mSpotifyAccessToken);
         fetchLastPlayedTracks(this.mSpotifyAccessToken);
