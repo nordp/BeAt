@@ -30,6 +30,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.VisibleRegion;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.ValueEventListener;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
@@ -66,6 +68,7 @@ public class MapsActivity extends FragmentActivity implements
     private FusedLocationProviderClient mFusedLocationClient;
 
     GeoFire geoFire = new GeoFire(FirebaseDatabase.getInstance().getReference("/geofire"));
+    DatabaseReference spots = FirebaseDatabase.getInstance().getReference("spots");
     private GeoQuery geoQuery;
 
     private Marker mCurrentPositionMarker;
@@ -311,6 +314,9 @@ public class MapsActivity extends FragmentActivity implements
         Log.d("MainActivity", "Received connection message: " + message);
     }
 
+    //
+    // Init Geofire
+    //
     private void initGeoFire(LatLng latLng) {
         geoQuery = geoFire.queryAtLocation(new GeoLocation(latLng.latitude, latLng.longitude), getVisibleRegion());
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
@@ -342,12 +348,33 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     private void removeSpotMarker(String key) {
-        //TODO Fetch spotify data
-        //TODO Instantiate and populate mMap
+        //TODO Remove marker from mMap
     }
+//SpotMarker(int spotKey, String trackName, String trackUri, String artistName, String albumCoverWebUrl, LatLng latLng)
+    private void addSpotMarker(final String key, final GeoLocation location) {
+        spots.child(key).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d("MapsActivity", dataSnapshot.child("track").getValue().toString());
+                DataSnapshot track = dataSnapshot.child("track");
+                SpotMarker spotMarker = new SpotMarker(
+                        Integer.valueOf(key),
+                        track.child("name").getValue().toString(),
+                        track.child("uri").getValue().toString(),
+                        track.child("artistName").getValue().toString(),
+                        track.child("albumCoverWebUrl").getValue().toString(),
+                        new LatLng(location.latitude,location.longitude));
+                mMap.addMarker(spotMarker.customMarker);
+            }
 
-    private void addSpotMarker(String key, GeoLocation location) {
-        //TODO Remove spot from mMap
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d("MapsActivity", databaseError.toString());
+            }
+        });
+
+
+        //TODO refresh picture of marker
     }
 
     //UTIL
