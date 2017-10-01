@@ -429,6 +429,8 @@ public class MapsActivity extends FragmentActivity implements
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(49.008587, 20.961517), 0.0f));
+
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
             @Override
             public void onCameraMove() {
@@ -652,7 +654,7 @@ public class MapsActivity extends FragmentActivity implements
             public void onKeyEntered(String key, GeoLocation location) {
                 LatLng markerLoc = new LatLng(location.latitude, location.longitude);
 
-                MarkerOptions placedMarkerOptions = new MarkerOptions().flat(false).position(markerLoc).icon(BitmapDescriptorFactory.fromResource(R.drawable.user_position_small));
+                MarkerOptions placedMarkerOptions = new MarkerOptions().flat(true).anchor(0.5f, 0.5f).position(markerLoc).icon(BitmapDescriptorFactory.fromResource(R.drawable.song_point_small));
                 Marker placedMarker = mMap.addMarker(placedMarkerOptions);
 
                 placedSpotMarkers.put(key, placedMarker);
@@ -729,6 +731,7 @@ public class MapsActivity extends FragmentActivity implements
                     return;
                 spots.child(key).child("info").removeEventListener(oldMarker);
                 oldMarker.customMarker.remove();
+                visibleAlbumSpotMarkers.remove(key);
             }
 
             @Override

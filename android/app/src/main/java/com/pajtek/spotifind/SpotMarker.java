@@ -34,7 +34,7 @@ class SpotMarker implements ValueEventListener{
 
     SpotMarker(final GoogleMap mMap, String spotKey, LatLng location) {
         this.spotKey = spotKey;
-        MarkerOptions markerOptions =  new MarkerOptions().flat(false).position(location).icon(BitmapDescriptorFactory.fromResource(R.drawable.user_position_small));
+        MarkerOptions markerOptions =  new MarkerOptions().flat(false).anchor(0.5f, 1.0f).position(location).icon(BitmapDescriptorFactory.fromResource(R.drawable.user_position_small));
         customMarker = mMap.addMarker(markerOptions);
     }
 
