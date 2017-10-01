@@ -44,34 +44,69 @@
             android:text="Camera" />
 
         <pl.bclogic.pulsator4droid.library.PulsatorLayout
+            android:id="@+id/pulsator0"
+            android:layout_width="300px"
+            android:layout_height="300px">
+        </pl.bclogic.pulsator4droid.library.PulsatorLayout>
+        <pl.bclogic.pulsator4droid.library.PulsatorLayout
             android:id="@+id/pulsator1"
             android:layout_width="300px"
             android:layout_height="300px">
         </pl.bclogic.pulsator4droid.library.PulsatorLayout>
         <pl.bclogic.pulsator4droid.library.PulsatorLayout
             android:id="@+id/pulsator2"
-            android:layout_width="100dp"
-            android:layout_height="100dp">
+            android:layout_width="300px"
+            android:layout_height="300px">
         </pl.bclogic.pulsator4droid.library.PulsatorLayout>
         <pl.bclogic.pulsator4droid.library.PulsatorLayout
             android:id="@+id/pulsator3"
-            android:layout_width="100dp"
-            android:layout_height="100dp">
+            android:layout_width="300px"
+            android:layout_height="300px">
         </pl.bclogic.pulsator4droid.library.PulsatorLayout>
         <pl.bclogic.pulsator4droid.library.PulsatorLayout
             android:id="@+id/pulsator4"
-            android:layout_width="100dp"
-            android:layout_height="100dp">
+            android:layout_width="300px"
+            android:layout_height="300px">
         </pl.bclogic.pulsator4droid.library.PulsatorLayout>
         <pl.bclogic.pulsator4droid.library.PulsatorLayout
-            android:id="@+id/pulsato5r"
-            android:layout_width="100dp"
-            android:layout_height="100dp">
+            android:id="@+id/pulsator5"
+            android:layout_width="300px"
+            android:layout_height="300px">
         </pl.bclogic.pulsator4droid.library.PulsatorLayout>
         <pl.bclogic.pulsator4droid.library.PulsatorLayout
             android:id="@+id/pulsator6"
-            android:layout_width="100dp"
-            android:layout_height="100dp">
+            android:layout_width="300px"
+            android:layout_height="300px">
+        </pl.bclogic.pulsator4droid.library.PulsatorLayout>
+        <pl.bclogic.pulsator4droid.library.PulsatorLayout
+            android:id="@+id/pulsator7"
+            android:layout_width="300px"
+            android:layout_height="300px">
+        </pl.bclogic.pulsator4droid.library.PulsatorLayout>
+        <pl.bclogic.pulsator4droid.library.PulsatorLayout
+            android:id="@+id/pulsator8"
+            android:layout_width="300px"
+            android:layout_height="300px">
+        </pl.bclogic.pulsator4droid.library.PulsatorLayout>
+        <pl.bclogic.pulsator4droid.library.PulsatorLayout
+            android:id="@+id/pulsator9"
+            android:layout_width="300px"
+            android:layout_height="300px">
+        </pl.bclogic.pulsator4droid.library.PulsatorLayout>
+        <pl.bclogic.pulsator4droid.library.PulsatorLayout
+            android:id="@+id/pulsator10"
+            android:layout_width="300px"
+            android:layout_height="300px">
+        </pl.bclogic.pulsator4droid.library.PulsatorLayout>
+        <pl.bclogic.pulsator4droid.library.PulsatorLayout
+            android:id="@+id/pulsator11"
+            android:layout_width="300px"
+            android:layout_height="300px">
+        </pl.bclogic.pulsator4droid.library.PulsatorLayout>
+        <pl.bclogic.pulsator4droid.library.PulsatorLayout
+            android:id="@+id/pulsator12"
+            android:layout_width="300px"
+            android:layout_height="300px">
         </pl.bclogic.pulsator4droid.library.PulsatorLayout>
     </fragment>
 
@@ -93,3 +128,4 @@
         </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>
+

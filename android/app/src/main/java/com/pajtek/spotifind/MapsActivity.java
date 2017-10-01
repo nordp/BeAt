@@ -8,7 +8,6 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Point;
 import android.location.Location;
 import android.media.AudioManager;
 import android.support.annotation.NonNull;
@@ -70,6 +69,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -103,8 +103,10 @@ public class MapsActivity extends FragmentActivity implements
 
     GeoFire geoFire = new GeoFire(FirebaseDatabase.getInstance().getReference("/geofire"));
     DatabaseReference spots = FirebaseDatabase.getInstance().getReference("spots");
+
     Map<String, Marker> placedSpotMarkers = new HashMap<>();
     private GeoQuery placedSpotQuery;
+    private PulseMarkerHandler pulseMarkerHandler;
 
     Map<String, LatLng> animatedMarkers = new HashMap<>();
     private GeoQuery animatedMarkerQuery;
@@ -118,7 +120,6 @@ public class MapsActivity extends FragmentActivity implements
     private Marker mCurrentPositionMarker;
     LatLng mLastPosition = null;
     private PulsatorLayout pulsatorLayout;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,17 +144,7 @@ public class MapsActivity extends FragmentActivity implements
 
         // TODO If the user is already "logged in", just remove the log in button & stuff. But maybe not required for this app right now?
 
-        pulseSetup();
-
-    }
-
-    private void pulseSetup() {
-        pulsatorLayout = (PulsatorLayout) findViewById(R.id.pulsator1);
-        pulsatorLayout.setAlpha(0.3f);
-        pulsatorLayout.setVisibility(View.INVISIBLE);
-        pulsatorLayout.setCount(4);
-        pulsatorLayout.setDuration(7000);
-        pulsatorLayout.start();
+        initPulseMarkerHandler();
     }
 
     @Override
@@ -442,7 +433,7 @@ public class MapsActivity extends FragmentActivity implements
                     GeoLocation loc = new GeoLocation(mMap.getCameraPosition().target.latitude,mMap.getCameraPosition().target.longitude);
                     placedSpotQuery.setLocation(loc, getVisibleRegion());
                 }
-                replaceAnimation();
+                pulseMarkerHandler.update();
             }
         });
 
@@ -624,14 +615,7 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     private void replaceAnimation() {
-        LatLng latlon = new LatLng(57.704217, 11.965250);
-        pulsatorLayout.setVisibility(View.VISIBLE);
 
-        Point point = mMap.getProjection().toScreenLocation(latlon);
-
-        Log.d("LOGGED", String.valueOf(point.x) +", " + String.valueOf(point.y));
-        pulsatorLayout.setX(point.x - 150);
-        pulsatorLayout.setY(point.y - 150);
     }
 
     @Override
@@ -748,6 +732,26 @@ public class MapsActivity extends FragmentActivity implements
         });
 
 
+    }
+
+    private void initPulseMarkerHandler(){
+
+        Log.d("Tagg", "init");
+        List<PulsatorLayout> pulsatorLayoutArrayList = new ArrayList<>();
+        pulsatorLayoutArrayList.add((PulsatorLayout) findViewById(R.id.pulsator1));
+        pulsatorLayoutArrayList.add((PulsatorLayout) findViewById(R.id.pulsator2));
+        pulsatorLayoutArrayList.add((PulsatorLayout) findViewById(R.id.pulsator3));
+        pulsatorLayoutArrayList.add((PulsatorLayout) findViewById(R.id.pulsator4));
+        pulsatorLayoutArrayList.add((PulsatorLayout) findViewById(R.id.pulsator5));
+        pulsatorLayoutArrayList.add((PulsatorLayout) findViewById(R.id.pulsator6));
+        pulsatorLayoutArrayList.add((PulsatorLayout) findViewById(R.id.pulsator7));
+        pulsatorLayoutArrayList.add((PulsatorLayout) findViewById(R.id.pulsator8));
+        pulsatorLayoutArrayList.add((PulsatorLayout) findViewById(R.id.pulsator9));
+        pulsatorLayoutArrayList.add((PulsatorLayout) findViewById(R.id.pulsator10));
+        pulsatorLayoutArrayList.add((PulsatorLayout) findViewById(R.id.pulsator11));
+        pulsatorLayoutArrayList.add((PulsatorLayout) findViewById(R.id.pulsator12));
+
+        pulseMarkerHandler = new PulseMarkerHandler(animatedMarkers, mMap, pulsatorLayoutArrayList);
     }
 
     //UTIL
