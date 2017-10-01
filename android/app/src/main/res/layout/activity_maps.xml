@@ -1,69 +1,95 @@
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:map="http://schemas.android.com/apk/res-auto"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/map"
-    android:name="com.google.android.gms.maps.SupportMapFragment"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/bgLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.pajtek.spotifind.MapsActivity"
-    android:background="#000">
+    tools:context="com.pajtek.spotifind.MapsActivity">
 
-    <ImageView
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000">
 
-        android:id="@+id/gradientImageView"
-        android:layout_width="450dp"
-        android:layout_height="750dp"
-        android:layout_gravity="center_vertical|center_horizontal"
+        <ImageView
 
-        android:alpha="0.5"
-        android:src="@drawable/gradient02_720" />
+            android:id="@+id/gradientImageView"
+            android:layout_width="450dp"
+            android:layout_height="750dp"
+            android:layout_gravity="center_vertical|center_horizontal"
 
-    <ImageButton
-        android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:layout_gravity="center_vertical|center_horizontal"
-        android:adjustViewBounds="true"
-        android:background="?android:attr/panelBackground"
-        android:onClick="loginButtonPressed"
-        android:scaleType="fitCenter"
-        android:src="@drawable/connect_button"/>
+            android:alpha="0.5"
+            android:src="@drawable/gradient02_720" />
 
-    <Button
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:adjustViewBounds="true"
-        android:onClick="debugButtonPressed"
-        android:scaleType="fitCenter"
-        android:text="Camera" />
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_gravity="center_vertical|center_horizontal"
+            android:adjustViewBounds="true"
+            android:background="?android:attr/panelBackground"
+            android:onClick="loginButtonPressed"
+            android:scaleType="fitCenter"
+            android:src="@drawable/connect_button"/>
 
-    <pl.bclogic.pulsator4droid.library.PulsatorLayout
-        android:id="@+id/pulsator1"
-        android:layout_width="300px"
-        android:layout_height="300px">
-    </pl.bclogic.pulsator4droid.library.PulsatorLayout>
-    <pl.bclogic.pulsator4droid.library.PulsatorLayout
-        android:id="@+id/pulsator2"
-        android:layout_width="100dp"
-        android:layout_height="100dp">
-    </pl.bclogic.pulsator4droid.library.PulsatorLayout>
-    <pl.bclogic.pulsator4droid.library.PulsatorLayout
-        android:id="@+id/pulsator3"
-        android:layout_width="100dp"
-        android:layout_height="100dp">
-    </pl.bclogic.pulsator4droid.library.PulsatorLayout>
-    <pl.bclogic.pulsator4droid.library.PulsatorLayout
-        android:id="@+id/pulsator4"
-        android:layout_width="100dp"
-        android:layout_height="100dp">
-    </pl.bclogic.pulsator4droid.library.PulsatorLayout>
-    <pl.bclogic.pulsator4droid.library.PulsatorLayout
-        android:id="@+id/pulsato5r"
-        android:layout_width="100dp"
-        android:layout_height="100dp">
-    </pl.bclogic.pulsator4droid.library.PulsatorLayout>
-    <pl.bclogic.pulsator4droid.library.PulsatorLayout
-        android:id="@+id/pulsator6"
-        android:layout_width="100dp"
-        android:layout_height="100dp">
-    </pl.bclogic.pulsator4droid.library.PulsatorLayout>
-</fragment>
+        <Button
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:adjustViewBounds="true"
+            android:onClick="debugButtonPressed"
+            android:scaleType="fitCenter"
+            android:text="Camera" />
+
+        <pl.bclogic.pulsator4droid.library.PulsatorLayout
+            android:id="@+id/pulsator1"
+            android:layout_width="300px"
+            android:layout_height="300px">
+        </pl.bclogic.pulsator4droid.library.PulsatorLayout>
+        <pl.bclogic.pulsator4droid.library.PulsatorLayout
+            android:id="@+id/pulsator2"
+            android:layout_width="100dp"
+            android:layout_height="100dp">
+        </pl.bclogic.pulsator4droid.library.PulsatorLayout>
+        <pl.bclogic.pulsator4droid.library.PulsatorLayout
+            android:id="@+id/pulsator3"
+            android:layout_width="100dp"
+            android:layout_height="100dp">
+        </pl.bclogic.pulsator4droid.library.PulsatorLayout>
+        <pl.bclogic.pulsator4droid.library.PulsatorLayout
+            android:id="@+id/pulsator4"
+            android:layout_width="100dp"
+            android:layout_height="100dp">
+        </pl.bclogic.pulsator4droid.library.PulsatorLayout>
+        <pl.bclogic.pulsator4droid.library.PulsatorLayout
+            android:id="@+id/pulsato5r"
+            android:layout_width="100dp"
+            android:layout_height="100dp">
+        </pl.bclogic.pulsator4droid.library.PulsatorLayout>
+        <pl.bclogic.pulsator4droid.library.PulsatorLayout
+            android:id="@+id/pulsator6"
+            android:layout_width="100dp"
+            android:layout_height="100dp">
+        </pl.bclogic.pulsator4droid.library.PulsatorLayout>
+    </fragment>
+
+    <RelativeLayout
+        android:id="@+id/design_bottom_sheet"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        app:behavior_hideable="true"
+        app:behavior_peekHeight="50dp"
+        app:elevation="4dp"
+        app:layout_behavior="@string/bottom_sheet_behavior">
+        <TextView
+            android:id="@+id/bottomsheet_text"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Introducing Bottom Sheets"
+            android:textColor="#FFFFFF"/>
+        </RelativeLayout>
+
+</android.support.design.widget.CoordinatorLayout>
