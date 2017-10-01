@@ -105,6 +105,8 @@ public class MapsActivity extends FragmentActivity implements
     DatabaseReference spots = FirebaseDatabase.getInstance().getReference("spots");
     private GeoQuery geoQuery;
 
+    //private Map<String, SpotMarker> m
+
     private Marker mCurrentPositionMarker;
     LatLng mLastPosition = null;
     Location mLastLocation = null;
@@ -135,19 +137,7 @@ public class MapsActivity extends FragmentActivity implements
 
         // TODO If the user is already "logged in", just remove the log in button & stuff. But maybe not required for this app right now?
 
-        // Authenticate Spotify
-        {
-            AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(SPOTIFY_CLIENT_ID, AuthenticationResponse.Type.TOKEN, SPOTIFY_REDIRECT_URI);
-            builder.setScopes(new String[]{"streaming", "user-read-birthdate", "user-read-email", "user-read-private", "user-top-read"});
-            AuthenticationRequest request = builder.build();
-
-            AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
-        }
-
         pulseSetup();
-
-
-
     }
 
     private void pulseSetup(){
@@ -219,7 +209,7 @@ public class MapsActivity extends FragmentActivity implements
 
     private void currentLocationUpdated(Location location) {
 
-        if (mMap == null && !mSpotifyLoggedIn) {
+        if (mMap == null || !mSpotifyLoggedIn) {
             Log.d("MapsActivity", "Can't set markers etc. since maps isn't initialized yet and not yet logged in to Spotify!");
             return;
         }
@@ -577,8 +567,6 @@ public class MapsActivity extends FragmentActivity implements
         view.setVisibility(View.INVISIBLE);
         // Fade out green tint when logged in! (in callback later)
 
-        ImageView imageView = (ImageView) findViewById(R.id.gradientImageView);
-        imageView.setAlpha(0.2f);
         pulsatorLayout.setX(700f);
         pulsatorLayout.setY(700f);
     }
