@@ -6,15 +6,17 @@ package com.pajtek.spotifind;
 
 public class TrackInfo {
 
-    public TrackInfo(String artistName, String trackName, String trackUri) {
+    public TrackInfo(String artistName, String trackName, String trackUri, String albumCoverWebUrl) {
         this.artistName = artistName;
         this.trackName = trackName;
         this.trackUri = trackUri;
+        this.albumCoverWebUrl = albumCoverWebUrl;
     }
 
     final String artistName;
     final String trackName;
     final String trackUri;
+    final String albumCoverWebUrl;
 
     @Override
     public String toString() {

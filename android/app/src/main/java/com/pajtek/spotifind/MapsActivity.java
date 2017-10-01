@@ -8,6 +8,8 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.media.AudioManager;
 import android.support.annotation.NonNull;
@@ -352,15 +354,16 @@ public class MapsActivity extends FragmentActivity implements
 
                     JSONArray items = response.getJSONArray("items");
                     for (int i = 0; i < items.length(); i++) {
-
+                        Log.e("MapsActivity", items.getJSONObject(i).toString());
                         JSONObject trackObject = items.getJSONObject(i);
                         JSONObject firstArtist = trackObject.getJSONArray("artists").getJSONObject(0);
 
                         String artistName = firstArtist.getString("name");
                         String trackName = trackObject.getString("name");
                         String trackUri = trackObject.getString("uri");
+                        String albumCoverWebUrl = trackObject.getJSONObject("album").getJSONArray("images").getJSONObject(1).getString("url");
 
-                        TrackInfo track = new TrackInfo(artistName, trackName, trackUri);
+                        TrackInfo track = new TrackInfo(artistName, trackName, trackUri, albumCoverWebUrl);
                         mUserTopTracks.add(track);
 
                     }
@@ -423,6 +426,15 @@ public class MapsActivity extends FragmentActivity implements
                 View addOverlay = findViewById(R.id.addOverLay);
                 ((TextView)findViewById(R.id.artistName)).setText(selectedTrack.artistName);
                 ((TextView)findViewById(R.id.trackName)).setText(selectedTrack.trackName);
+                new ImageLoader(){
+                    @Override
+                    protected void onPostExecute(Bitmap bmp) {
+                        ((ImageView)findViewById(R.id.albumImage)).setImageDrawable(new BitmapDrawable(getBaseContext().getResources(),bmp));
+                    }
+                }.execute(selectedTrack.albumCoverWebUrl);
+
+
+
                 addOverlay.setVisibility(View.VISIBLE);
 
                 return;
@@ -516,7 +528,7 @@ public class MapsActivity extends FragmentActivity implements
     //
 
     private void fadeInSong(final String trackId) {
-        fadeInSong(new TrackInfo("NOT SET", "NOT SET", trackId));
+        fadeInSong(new TrackInfo("NOT SET", "NOT SET", trackId, null));
     }
 
     private void fadeInSong(final TrackInfo track) {

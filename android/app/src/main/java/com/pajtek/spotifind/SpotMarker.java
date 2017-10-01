@@ -26,9 +26,7 @@ class SpotMarker implements ValueEventListener{
     private String spotKey;
 
     //Track info
-    private String trackName;
-    private String trackUri;
-    private String artistName;
+    private TrackInfo trackInfo;
 
     private static final int ALBUM_ICON_SIZE = 200;
 
@@ -42,7 +40,7 @@ class SpotMarker implements ValueEventListener{
 
     @Override
     public String toString() {
-        return artistName + " : " + trackName;
+        return trackInfo.artistName + " : " + trackInfo.trackName;
     }
 
     @Override
@@ -54,10 +52,11 @@ class SpotMarker implements ValueEventListener{
                 ){
             return;
         }
-
-        trackName = (String) dataSnapshot.child("name").getValue();
-        artistName = (String) dataSnapshot.child("artistName").getValue();
-        trackUri = "spotify:track:" + dataSnapshot.child("trackId").getValue();
+        trackInfo = new TrackInfo(
+            (String) dataSnapshot.child("name").getValue(),
+            (String) dataSnapshot.child("artistName").getValue(),
+            "spotify:track:" + dataSnapshot.child("trackId").getValue(),
+            (String)dataSnapshot.child("albumCoverWebUrl").getValue());
 
         new ImageLoader() {
             @Override
@@ -66,7 +65,6 @@ class SpotMarker implements ValueEventListener{
                 Log.e("SpotMarker", "Marker added");
             }
         }.execute((String)dataSnapshot.child("albumCoverWebUrl").getValue());
-
     }
 
     @Override
@@ -75,24 +73,10 @@ class SpotMarker implements ValueEventListener{
     }
 
     public TrackInfo getTrackInfo() {
-        return new TrackInfo(artistName, trackName, trackUri);
+        return trackInfo;
     }
 
     public LatLng getPosition() {
         return customMarker.getPosition();
-    }
-
-    private class ImageLoader extends AsyncTask<String, Void, Bitmap>{
-
-        @Override
-        protected Bitmap doInBackground(String... params) {
-            try {
-                URL url = new URL(params[0]);
-                return BitmapFactory.decodeStream(url.openConnection().getInputStream());
-            } catch(IOException e) {
-                Log.e("SpotMarker","ERROR LOADING BITMAP" + e.toString());
-                return null;
-            }
-        }
     }
 }
