@@ -18,6 +18,7 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -541,7 +542,7 @@ public class MapsActivity extends FragmentActivity implements
                         public void onAnimationEnd(Animator animation) {
 
                             mSpotifyPlayer.playUri(null, track.trackUri, 0, 0);
-
+                            ((ImageButton)findViewById(R.id.playButton)).setImageDrawable(getResources().getDrawable(R.drawable.button_paus));
                             ValueAnimator vaIn = ValueAnimator.ofFloat(0.0f, targetMaxVolume);
                             vaIn.setDuration(FADE_IN_OUT_TIME_MS);
                             vaIn.setRepeatCount(0);
@@ -575,6 +576,7 @@ public class MapsActivity extends FragmentActivity implements
                                 }
                             });
                             vaIn.start();
+                            ((ImageButton)findViewById(R.id.playButton)).setImageDrawable(getResources().getDrawable(R.drawable.button_paus));
 
                         }
 
@@ -832,6 +834,21 @@ public class MapsActivity extends FragmentActivity implements
         pulseMarkerHandler = new PulseMarkerHandler(animatedMarkers, mMap, pulsatorLayoutArrayList);
     }
 
+    public void playButtonClicked(View view){
+        if (mSpotifyPlayer.getPlaybackState().isPlaying){
+        mSpotifyPlayer.pause(new Player.OperationCallback() {
+            @Override
+            public void onSuccess() {
+                ImageButton button = (ImageButton) findViewById(R.id.playButton);
+                button.setImageDrawable(getResources().getDrawable(R.drawable.button_play));
+            }
+
+            @Override
+            public void onError(Error error) {
+
+            }
+        });}
+    }
     //UTIL
     private double getVisibleRegion() {
         //Calculate the current visible region

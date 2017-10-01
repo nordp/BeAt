@@ -267,5 +267,15 @@
             android:layout_height="wrap_content" />
     </RelativeLayout>
 
+    <ImageButton
+        android:id="@+id/playButton"
+        android:background="?android:attr/panelBackground"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/button_paus"
+        android:layout_gravity="bottom|right"
+        android:onClick="playButtonClicked"
+        />
+
 </android.support.design.widget.CoordinatorLayout>
 
