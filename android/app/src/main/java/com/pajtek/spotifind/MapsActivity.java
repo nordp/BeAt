@@ -46,8 +46,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.VisibleRegion;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.ValueEventListener;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
@@ -104,9 +102,16 @@ public class MapsActivity extends FragmentActivity implements
 
     GeoFire geoFire = new GeoFire(FirebaseDatabase.getInstance().getReference("/geofire"));
     DatabaseReference spots = FirebaseDatabase.getInstance().getReference("spots");
-    Map<String, SpotMarker> placedSpotMarkers = new HashMap<>();
-    private GeoQuery geoQuery;
+    Map<String, LatLng> placedSpotMarkers = new HashMap<>();
+    private GeoQuery placedSpotQuery;
 
+    Map<String, LatLng> animatedMarkers = new HashMap<>();
+    private GeoQuery animatedMarkerQuery;
+    private final static double ANIMATE_MARKER_WITHIN_RADIUS_M = 10000;
+
+
+    Map<String, SpotMarker> visibleAlbumSpotMarkers = new HashMap<>();
+    private GeoQuery visibleAlbumSpotQuery;
     private final static double PLAY_SONG_WITHIN_RADIUS_M = 100;
 
     private Marker mCurrentPositionMarker;
@@ -222,7 +227,7 @@ public class MapsActivity extends FragmentActivity implements
             initGeoFire(position);
         }
 
-        geoQuery.setCenter(new GeoLocation(position.latitude, position.longitude));
+        placedSpotQuery.setCenter(new GeoLocation(position.latitude, position.longitude));
 
         // Update closest song/marker
         SpotMarker closestMarker = getMarkerClosestToPosition(position);
@@ -260,7 +265,7 @@ public class MapsActivity extends FragmentActivity implements
         SpotMarker closest = null;
         double closestDistance = Double.POSITIVE_INFINITY;
 
-        for (SpotMarker marker : placedSpotMarkers.values()) {
+        for (SpotMarker marker : visibleAlbumSpotMarkers.values()) {
             double distance = distanceBetweenLocationsRelative(position, marker.getPosition());
             if (distance < closestDistance) {
                 closestDistance = distance;
@@ -424,8 +429,8 @@ public class MapsActivity extends FragmentActivity implements
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
             @Override
             public void onCameraMove() {
-                if (geoQuery != null && mSpotifyLoggedIn) {
-                    geoQuery.setRadius(getVisibleRegion());
+                if (placedSpotQuery != null && mSpotifyLoggedIn) {
+                    placedSpotQuery.setRadius(getVisibleRegion());
                 }
                 replaceAnimation();
             }
@@ -636,16 +641,21 @@ public class MapsActivity extends FragmentActivity implements
     //
     private void initGeoFire(LatLng latLng) {
         Log.i("MapsActivity", "GEOFIRE INITIATED");
-        geoQuery = geoFire.queryAtLocation(new GeoLocation(latLng.latitude, latLng.longitude), getVisibleRegion());
-        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+        GeoLocation loc = new GeoLocation(latLng.latitude, latLng.longitude);
+        placedSpotQuery = geoFire.queryAtLocation(loc, getVisibleRegion());
+        placedSpotQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
-                addSpotMarker(key, location);
+                placedSpotMarkers.put(key, new LatLng(location.latitude, location.longitude));
+                Log.i("MapsActivity", "MARKER PUT! key: " + key);
             }
 
             @Override
             public void onKeyExited(String key) {
-                removeSpotMarker(key);
+
+                Log.i("MapsActivity", "Removing " + key);
+                placedSpotMarkers.remove(key);
+                Log.i("MapsActivity", "MARKER REMOVED!");
             }
 
             @Override
@@ -663,28 +673,72 @@ public class MapsActivity extends FragmentActivity implements
                 Log.e("MapsActivity", error.toString());
             }
         });
-    }
 
-    private void removeSpotMarker(String key) {
-        Log.i("MapsActivity", "Removing " + key);
-        SpotMarker oldMarker = placedSpotMarkers.get(key);
-        if (oldMarker == null)
-            return;
-        spots.child(key).child("info").removeEventListener(oldMarker);
-        oldMarker.customMarker.remove();
-        placedSpotMarkers.remove(key);
-        Log.i("MapsActivity", "MARKER REMOVED!");
-    }
+        animatedMarkerQuery = geoFire.queryAtLocation(loc, ANIMATE_MARKER_WITHIN_RADIUS_M / 1000);
+        animatedMarkerQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+            @Override
+            public void onKeyEntered(String key, GeoLocation location) {
+                animatedMarkers.put(key, new LatLng(location.latitude, location.longitude));
 
-    private void addSpotMarker(final String key, final GeoLocation location) {
-        SpotMarker newMarker = new SpotMarker(mMap, key, new LatLng(location.latitude, location.longitude));
-        placedSpotMarkers.put(key, newMarker);
+                //TODO CALL ANIMATION UPDATE ONCE
+            }
 
-        Log.i("MapsActivity", "MARKER PUT! key: " + key);
+            @Override
+            public void onKeyExited(String key) {
+                animatedMarkers.remove(key);
+                //TODO CALL ANIMATION UPDATE ONCE
+            }
 
-        spots.child(key).child("info").addValueEventListener(newMarker);
+            @Override
+            public void onKeyMoved(String key, GeoLocation location) {
+                //ORIMLIGT
+            }
 
-        //TODO refresh picture of marker
+            @Override
+            public void onGeoQueryReady() {
+
+            }
+
+            @Override
+            public void onGeoQueryError(DatabaseError error) {
+                Log.e("MapsActivity", error.toString());
+            }
+        });
+
+        visibleAlbumSpotQuery = geoFire.queryAtLocation(loc, PLAY_SONG_WITHIN_RADIUS_M / 1000);
+        visibleAlbumSpotQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+            @Override
+            public void onKeyEntered(String key, GeoLocation location) {
+                SpotMarker newMarker = new SpotMarker(mMap, key, new LatLng(location.latitude, location.longitude));
+                spots.child(key).child("info").addValueEventListener(newMarker);
+            }
+
+            @Override
+            public void onKeyExited(String key) {
+                SpotMarker oldMarker = visibleAlbumSpotMarkers.get(key);
+                if (oldMarker == null)
+                    return;
+                spots.child(key).child("info").removeEventListener(oldMarker);
+                oldMarker.customMarker.remove();
+            }
+
+            @Override
+            public void onKeyMoved(String key, GeoLocation location) {
+
+            }
+
+            @Override
+            public void onGeoQueryReady() {
+
+            }
+
+            @Override
+            public void onGeoQueryError(DatabaseError error) {
+
+            }
+        });
+
+
     }
 
     //UTIL
