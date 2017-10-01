@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -381,10 +382,34 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     private void topTracksLoaded() {
-        Log.d("MapsActivity", mUserTopTracks.toString());
+        Log.d("MapsActivity", "Top tracks loaded (num=" + mUserTopTracks.size() + "): " + mUserTopTracks.toString());
 
-        TrackInfo track = mUserTopTracks.get(new Random().nextInt(mUserTopTracks.size()));
-        addSongToCurrentLocation(track);
+        final int[] trackIds = new int[]{ R.id.track1, R.id.track2, R.id.track3, R.id.track4, R.id.track5 };
+        for (int i = 0; i < trackIds.length; i++) {
+
+            TrackInfo trackInfo = mUserTopTracks.get(i);
+
+            TextView textView = (TextView) this.findViewById(trackIds[i]);
+            textView.setText(trackInfo.artistName + " – " + trackInfo.trackName);
+
+        }
+    }
+
+    public void topTrackPressed(View view) {
+        final int[] trackIds = new int[]{ R.id.track1, R.id.track2, R.id.track3, R.id.track4, R.id.track5 };
+
+        for (int i = 0; i < trackIds.length; i++) {
+            if (view.getId() == trackIds[i]) {
+
+                TrackInfo selectedTrack = mUserTopTracks.get(i);
+                addSongToCurrentLocation(selectedTrack);
+                return;
+
+            }
+        }
+
+        // Something went wrong, couldn't find the song
+        Log.e("MapsActivity", "The user pressed some top track that doesn't exist?!");
     }
 
     private void addSongToCurrentLocation(TrackInfo track) {
