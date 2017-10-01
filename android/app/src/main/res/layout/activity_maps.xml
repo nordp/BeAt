@@ -116,20 +116,77 @@
     </fragment>
 
     <RelativeLayout
-        android:id="@+id/design_bottom_sheet"
+        android:id="@+id/tracks_sheet"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#000000"
-        app:behavior_hideable="true"
-        app:behavior_peekHeight="50dp"
+        android:layout_height="340dp"
+        app:behavior_hideable="false"
+        app:behavior_peekHeight="60dp"
         app:elevation="4dp"
         app:layout_behavior="@string/bottom_sheet_behavior">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:src="@drawable/button_tracklist"
+            android:scaleType="fitCenter"
+            android:background="?android:attr/panelBackground"
+            android:layout_alignParentTop="true"/>
+        <ImageButton
+            android:id="@+id/tracklistButton"
+            android:src="@drawable/button_tracklist_x"
+            android:scaleType="fitCenter"
+            android:layout_width="55dp"
+            android:layout_marginTop="12dp"
+            android:layout_height="wrap_content"
+            android:background="?android:attr/panelBackground"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentTop="true"
+            android:onClick="addButtonPressed"/>
+
         <TextView
-            android:id="@+id/bottomsheet_text"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="Introducing Bottom Sheets"
-            android:textColor="#FFFFFF"/>
+            android:id="@+id/track1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Carly Rae Jepsen : Cut To The Feeling"
+            android:textColor="#FFFFFF"
+            android:layout_below="@id/tracklistButton"
+            />
+
+        <TextView
+            android:id="@+id/track2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Carly Rae Jepsen : Cut To The Feeling"
+            android:textColor="#FFFFFF"
+            android:layout_below="@id/track1"
+            />
+
+        <TextView
+            android:id="@+id/track3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Carly Rae Jepsen : Cut To The Feeling"
+            android:textColor="#FFFFFF"
+            android:layout_below="@id/track2"
+            />
+
+        <TextView
+            android:id="@+id/track4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Carly Rae Jepsen : Cut To The Feeling"
+            android:textColor="#FFFFFF"
+            android:layout_below="@id/track3"
+            />
+
+        <TextView
+            android:id="@+id/track5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Carly Rae Jepsen : Cut To The Feeling"
+            android:textColor="#FFFFFF"
+            android:layout_below="@id/track4"
+            />
         </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>

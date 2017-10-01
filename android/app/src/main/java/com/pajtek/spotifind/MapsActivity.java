@@ -11,6 +11,8 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.media.AudioManager;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -120,6 +122,7 @@ public class MapsActivity extends FragmentActivity implements
     private Marker mCurrentPositionMarker;
     LatLng mLastPosition = null;
     private PulsatorLayout pulsatorLayout;
+    private BottomSheetDialogFragment tracklist;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -612,6 +615,19 @@ public class MapsActivity extends FragmentActivity implements
     public void debugButtonPressed(View view){
         Log.d("LOGGED", mMap.getCameraPosition().target.toString());
         topTracksLoaded();
+    }
+
+    public void addButtonPressed(View view) {
+        View trackList = findViewById(R.id.tracks_sheet);
+        BottomSheetBehavior trackListBehavior = BottomSheetBehavior.from(trackList);
+        if(trackListBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
+            trackListBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+            //view.findViewById(R.id.action_sign).setRotation(45);
+        }
+        else {
+            trackListBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            //view.findViewById(R.id.action_sign).setRotation(0);
+        }
     }
 
     private void replaceAnimation() {
