@@ -429,6 +429,10 @@ public class MapsActivity extends FragmentActivity implements
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        mMap.getUiSettings().setMapToolbarEnabled(false);
+        mMap.getUiSettings().setIndoorLevelPickerEnabled(false);
+        mMap.getUiSettings().setMapToolbarEnabled(false);
+        mMap.getUiSettings().setScrollGesturesEnabled(false);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(49.008587, 20.961517), 0.0f));
 
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
@@ -582,15 +586,8 @@ public class MapsActivity extends FragmentActivity implements
         alphaAnimator.setDuration(2_000);
         alphaAnimator.start();
 
-        /*
-        fadeInSong("spotify:track:2TpxZ7JUBn3uw46aR7qd6V");
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                fadeInSong("spotify:track:5WSdMcWTKRdN1QYVJHJWxz");
-            }
-        }, 10_000);
-        */
+        // Enable scroll gestures
+        mMap.getUiSettings().setScrollGesturesEnabled(true);
     }
 
     @Override
