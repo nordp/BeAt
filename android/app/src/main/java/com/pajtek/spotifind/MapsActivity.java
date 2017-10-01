@@ -103,6 +103,7 @@ public class MapsActivity extends FragmentActivity implements
 
     GeoFire geoFire = new GeoFire(FirebaseDatabase.getInstance().getReference("/geofire"));
     DatabaseReference spots = FirebaseDatabase.getInstance().getReference("spots");
+    Map<String, SpotMarker> placedSpotMarkers = new HashMap<>();
     private GeoQuery geoQuery;
 
     //private Map<String, SpotMarker> m
@@ -622,7 +623,7 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     private void removeSpotMarker(String key) {
-        //TODO Remove marker from mMap
+        placedSpotMarkers.get(key).customMarker.remove();
     }
 
     private void addSpotMarker(final String key, final GeoLocation location) {
@@ -630,13 +631,13 @@ public class MapsActivity extends FragmentActivity implements
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                SpotMarker spotMarker = new SpotMarker(mMap,
+                placedSpotMarkers.put(key,new SpotMarker(mMap,
                         key,
                         dataSnapshot.child("name").getValue().toString(),
                         dataSnapshot.child("trackId").getValue().toString(),
                         dataSnapshot.child("artistName").getValue().toString(),
                         dataSnapshot.child("albumCoverWebUrl").getValue().toString(),
-                        new LatLng(location.latitude,location.longitude));
+                        new LatLng(location.latitude,location.longitude)));
             }
 
             @Override
