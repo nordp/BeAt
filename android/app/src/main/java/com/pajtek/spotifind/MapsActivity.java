@@ -729,6 +729,7 @@ public class MapsActivity extends FragmentActivity implements
                     return;
                 spots.child(key).child("info").removeEventListener(oldMarker);
                 oldMarker.customMarker.remove();
+                visibleAlbumSpotMarkers.remove(key);
             }
 
             @Override
