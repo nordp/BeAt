@@ -217,7 +217,7 @@
         android:layout_height="match_parent"
         android:padding="16dp"
         android:background="#000000"
-        android:visibility="visible">
+        android:visibility="invisible">
 
 
         <ImageView
