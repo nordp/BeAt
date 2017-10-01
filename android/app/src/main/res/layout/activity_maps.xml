@@ -38,8 +38,8 @@
 
     <pl.bclogic.pulsator4droid.library.PulsatorLayout
         android:id="@+id/pulsator1"
-        android:layout_width="100dp"
-        android:layout_height="100dp">
+        android:layout_width="300px"
+        android:layout_height="300px">
     </pl.bclogic.pulsator4droid.library.PulsatorLayout>
     <pl.bclogic.pulsator4droid.library.PulsatorLayout
         android:id="@+id/pulsator2"
