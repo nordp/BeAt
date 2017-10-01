@@ -110,7 +110,6 @@ public class MapsActivity extends FragmentActivity implements
 
     private Marker mCurrentPositionMarker;
     LatLng mLastPosition = null;
-    Location mLastLocation = null;
     private PulsatorLayout pulsatorLayout;
 
 
@@ -356,8 +355,8 @@ public class MapsActivity extends FragmentActivity implements
         LatLng pos = new LatLng(mLastPosition.latitude, mLastPosition.longitude);
         String trackUri = track.trackUri;
         String trackId = trackUri.split(":")[2];
-
         String unixTimeId = String.valueOf(new Date().getTime());
+        Log.d("MapsActivity", "PLACING TRACK: " + trackId + " at: " + mLastPosition + " with ID: " + unixTimeId);
 
         DatabaseReference base = spots.child(unixTimeId);
         base.child("trackId").setValue(trackId);
@@ -386,6 +385,7 @@ public class MapsActivity extends FragmentActivity implements
             public void onCameraMove() {
                 if (geoQuery != null && mSpotifyLoggedIn) {
                     geoQuery.setRadius(getVisibleRegion());
+                    //Log.d("MapsActivity", "QUERY RADIUS SET");
                 }
                 replaceAnimation();
             }
@@ -573,6 +573,7 @@ public class MapsActivity extends FragmentActivity implements
     }
     public void debugButtonPressed(View view){
         Log.d("LOGGED", mMap.getCameraPosition().target.toString());
+        topTracksLoaded();
     }
 
     private void replaceAnimation(){
@@ -593,6 +594,7 @@ public class MapsActivity extends FragmentActivity implements
     // Init Geofire
     //
     private void initGeoFire(LatLng latLng) {
+        Log.i("MapsActivity", "GEOFIRE INITIATED");
         geoQuery = geoFire.queryAtLocation(new GeoLocation(latLng.latitude, latLng.longitude), getVisibleRegion());
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
@@ -612,40 +614,34 @@ public class MapsActivity extends FragmentActivity implements
 
             @Override
             public void onGeoQueryReady() {
-                //???
+                Log.d("MapsActivity", "GEOQUERY READY");
             }
 
             @Override
             public void onGeoQueryError(DatabaseError error) {
-                Log.d("MapsActivity", error.toString());
+                Log.e("MapsActivity", error.toString());
             }
         });
     }
 
     private void removeSpotMarker(String key) {
-        placedSpotMarkers.get(key).customMarker.remove();
+        Log.i("MapsActivity", "Removing " + key);
+        SpotMarker oldMarker = placedSpotMarkers.get(key);
+        if (oldMarker == null)
+            return;
+        spots.child(key).child("info").removeEventListener(oldMarker);
+        oldMarker.customMarker.remove();
+        placedSpotMarkers.remove(key);
+        Log.i("MapsActivity", "MARKER REMOVED!");
     }
 
     private void addSpotMarker(final String key, final GeoLocation location) {
-        spots.child(key).child("info").addListenerForSingleValueEvent(new ValueEventListener() {
+        SpotMarker newMarker = new SpotMarker(mMap, key, new LatLng(location.latitude, location.longitude));
+        placedSpotMarkers.put(key, newMarker);
 
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                placedSpotMarkers.put(key,new SpotMarker(mMap,
-                        key,
-                        dataSnapshot.child("name").getValue().toString(),
-                        dataSnapshot.child("trackId").getValue().toString(),
-                        dataSnapshot.child("artistName").getValue().toString(),
-                        dataSnapshot.child("albumCoverWebUrl").getValue().toString(),
-                        new LatLng(location.latitude,location.longitude)));
-            }
+        Log.i("MapsActivity", "MARKER PUT! key: " + key);
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.d("MapsActivity", databaseError.toString());
-            }
-        });
-
+        spots.child(key).child("info").addValueEventListener(newMarker);
 
         //TODO refresh picture of marker
     }
