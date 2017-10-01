@@ -8,6 +8,7 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Point;
 import android.location.Location;
 import android.media.AudioManager;
 import android.support.annotation.NonNull;
@@ -65,9 +66,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.maps.android.SphericalUtil;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -77,7 +80,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+
 import pl.bclogic.pulsator4droid.library.PulsatorLayout;
+
 import static com.pajtek.spotifind.R.id.map;
 import static com.spotify.sdk.android.authentication.LoginActivity.REQUEST_CODE;
 
@@ -113,7 +118,6 @@ public class MapsActivity extends FragmentActivity implements
     private PulsatorLayout pulsatorLayout;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -138,19 +142,16 @@ public class MapsActivity extends FragmentActivity implements
         // TODO If the user is already "logged in", just remove the log in button & stuff. But maybe not required for this app right now?
 
         pulseSetup();
+
     }
 
-    private void pulseSetup(){
+    private void pulseSetup() {
         pulsatorLayout = (PulsatorLayout) findViewById(R.id.pulsator1);
-        //pulsatorLayout = new PulsatorLayout(this);
-        pulsatorLayout.setX(300f);
-        pulsatorLayout.setY(300f);
-        pulsatorLayout.setVisibility(View.VISIBLE);
+        pulsatorLayout.setAlpha(0.3f);
+        pulsatorLayout.setVisibility(View.INVISIBLE);
         pulsatorLayout.setCount(4);
         pulsatorLayout.setDuration(7000);
         pulsatorLayout.start();
-
-
     }
 
     @Override
@@ -225,7 +226,7 @@ public class MapsActivity extends FragmentActivity implements
             initGeoFire(position);
         }
 
-        geoQuery.setCenter(new GeoLocation(position.latitude,position.longitude));
+        geoQuery.setCenter(new GeoLocation(position.latitude, position.longitude));
 
         // TODO
         // TODO Here we can do stuff like query for the next applicable song etc.
@@ -297,43 +298,43 @@ public class MapsActivity extends FragmentActivity implements
 
         JsonObjectRequest topTracksRequest = new SpotifyRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 
-                @Override
-                public void onResponse(JSONObject response) {
-                    try {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
 
-                        JSONArray items = response.getJSONArray("items");
-                        for (int i = 0; i < items.length(); i++) {
+                    JSONArray items = response.getJSONArray("items");
+                    for (int i = 0; i < items.length(); i++) {
 
-                            JSONObject trackObject = items.getJSONObject(i);
-                            JSONObject firstArtist = trackObject.getJSONArray("artists").getJSONObject(0);
+                        JSONObject trackObject = items.getJSONObject(i);
+                        JSONObject firstArtist = trackObject.getJSONArray("artists").getJSONObject(0);
 
-                            String artistName = firstArtist.getString("name");
-                            String trackName = trackObject.getString("name");
-                            String trackUri = trackObject.getString("uri");
+                        String artistName = firstArtist.getString("name");
+                        String trackName = trackObject.getString("name");
+                        String trackUri = trackObject.getString("uri");
 
-                            TrackInfo track = new TrackInfo(artistName, trackName, trackUri);
-                            mUserTopTracks.add(track);
+                        TrackInfo track = new TrackInfo(artistName, trackName, trackUri);
+                        mUserTopTracks.add(track);
 
-                        }
-
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                topTracksLoaded();
-                            }
-                        });
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
                     }
 
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            topTracksLoaded();
+                        }
+                    });
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Log.e("MapsActivity", "Can't parse or download the top tracks response JSON");
-                }
+
             }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("MapsActivity", "Can't parse or download the top tracks response JSON");
+            }
+        }
         );
 
         queue.add(topTracksRequest);
@@ -355,8 +356,8 @@ public class MapsActivity extends FragmentActivity implements
         LatLng pos = new LatLng(mLastPosition.latitude, mLastPosition.longitude);
         String trackUri = track.trackUri;
         String trackId = trackUri.split(":")[2];
+
         String unixTimeId = String.valueOf(new Date().getTime());
-        Log.d("MapsActivity", "PLACING TRACK: " + trackId + " at: " + mLastPosition + " with ID: " + unixTimeId);
 
         DatabaseReference base = spots.child(unixTimeId);
         base.child("trackId").setValue(trackId);
@@ -385,7 +386,6 @@ public class MapsActivity extends FragmentActivity implements
             public void onCameraMove() {
                 if (geoQuery != null && mSpotifyLoggedIn) {
                     geoQuery.setRadius(getVisibleRegion());
-                    //Log.d("MapsActivity", "QUERY RADIUS SET");
                 }
                 replaceAnimation();
             }
@@ -417,7 +417,7 @@ public class MapsActivity extends FragmentActivity implements
                     vaOut.setRepeatCount(0);
                     vaOut.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                         public void onAnimationUpdate(ValueAnimator animation) {
-                            float animatedVolume = (float)animation.getAnimatedValue();
+                            float animatedVolume = (float) animation.getAnimatedValue();
                             setSpotifyPlayerVolume(animatedVolume);
                         }
                     });
@@ -432,7 +432,7 @@ public class MapsActivity extends FragmentActivity implements
                             vaIn.setRepeatCount(0);
                             vaIn.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                                 public void onAnimationUpdate(ValueAnimator animation) {
-                                    float animatedVolume = (float)animation.getAnimatedValue();
+                                    float animatedVolume = (float) animation.getAnimatedValue();
                                     setSpotifyPlayerVolume(animatedVolume);
                                 }
                             });
@@ -455,7 +455,7 @@ public class MapsActivity extends FragmentActivity implements
                             vaIn.setRepeatCount(0);
                             vaIn.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                                 public void onAnimationUpdate(ValueAnimator animation) {
-                                    float animatedVolume = (float)animation.getAnimatedValue();
+                                    float animatedVolume = (float) animation.getAnimatedValue();
                                     setSpotifyPlayerVolume(animatedVolume);
                                 }
                             });
@@ -480,7 +480,7 @@ public class MapsActivity extends FragmentActivity implements
         final AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         final int maxVolume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
 
-        int volumeToSet = (int)((float)maxVolume * volume);
+        int volumeToSet = (int) ((float) maxVolume * volume);
         am.setStreamVolume(AudioManager.STREAM_MUSIC, volumeToSet, 0);
     }
 
@@ -489,7 +489,7 @@ public class MapsActivity extends FragmentActivity implements
         final int maxVolume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         int volume = am.getStreamVolume(AudioManager.STREAM_MUSIC);
 
-        return (float)volume / (float)maxVolume;
+        return (float) volume / (float) maxVolume;
     }
 
     @Override
@@ -553,9 +553,7 @@ public class MapsActivity extends FragmentActivity implements
         Log.d("MainActivity", "Temporary error occurred");
     }
 
-    public void loginButtonPressed(View view){
-        Log.d("LOGGED", "loginButtonPressed: WorkS!!");
-
+    public void loginButtonPressed(View view) {
         // Authenticate Spotify
         {
             AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(SPOTIFY_CLIENT_ID, AuthenticationResponse.Type.TOKEN, SPOTIFY_REDIRECT_URI);
@@ -568,21 +566,24 @@ public class MapsActivity extends FragmentActivity implements
         view.setVisibility(View.INVISIBLE);
         // Fade out green tint when logged in! (in callback later)
 
-        pulsatorLayout.setX(700f);
-        pulsatorLayout.setY(700f);
+        ImageView imageView = (ImageView) findViewById(R.id.gradientImageView);
+        imageView.setAlpha(0.2f);
+
     }
     public void debugButtonPressed(View view){
         Log.d("LOGGED", mMap.getCameraPosition().target.toString());
         topTracksLoaded();
     }
 
-    private void replaceAnimation(){
-        float lat = (float) mMap.getCameraPosition().target.latitude;
-        float lon = (float) mMap.getCameraPosition().target.longitude;
+    private void replaceAnimation() {
+        LatLng latlon = new LatLng(57.704217, 11.965250);
+        pulsatorLayout.setVisibility(View.VISIBLE);
 
-        Log.d("LOGGED", String.valueOf(lat) + String.valueOf(lon));
-        pulsatorLayout.setX(lon);
-        pulsatorLayout.setY(lat);
+        Point point = mMap.getProjection().toScreenLocation(latlon);
+
+        Log.d("LOGGED", String.valueOf(point.x) +", " + String.valueOf(point.y));
+        pulsatorLayout.setX(point.x - 150);
+        pulsatorLayout.setY(point.y - 150);
     }
 
     @Override
