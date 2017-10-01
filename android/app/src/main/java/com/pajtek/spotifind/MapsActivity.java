@@ -233,12 +233,11 @@ public class MapsActivity extends FragmentActivity implements
 
         // Update closest song/marker
         SpotMarker closestMarker = getMarkerClosestToPosition(position);
-        if (closestMarker != null) {
+        if (closestMarker != null && closestMarker.getTrackInfo().trackUri != null) {
             double distance = distanceBetweenLocations(closestMarker.getPosition(), position);
             String currentlyPlayingURI = mSpotifyPlayer.getMetadata().currentTrack != null
                     ? mSpotifyPlayer.getMetadata().currentTrack.uri
                     : null;
-
             // Play song if it's within the radius and isn't already playing
             if (distance <= PLAY_SONG_WITHIN_RADIUS_M && !closestMarker.getTrackInfo().trackUri.equals(currentlyPlayingURI)) {
                 TrackInfo track = closestMarker.getTrackInfo();
