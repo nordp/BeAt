@@ -143,8 +143,6 @@ public class MapsActivity extends FragmentActivity implements
         }, FETCH_LOCATION_EVERY_X_MS, FETCH_LOCATION_EVERY_X_MS);
 
         // TODO If the user is already "logged in", just remove the log in button & stuff. But maybe not required for this app right now?
-
-        initPulseMarkerHandler();
     }
 
     @Override
@@ -441,6 +439,8 @@ public class MapsActivity extends FragmentActivity implements
         if (!success) {
             Log.e("MapsActivity", "Could not set the map style!");
         }
+
+        initPulseMarkerHandler();
     }
 
     //
