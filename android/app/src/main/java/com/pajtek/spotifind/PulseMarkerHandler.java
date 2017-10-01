@@ -32,7 +32,10 @@ public class PulseMarkerHandler {
     public void update() {
         Iterator iterator = map.entrySet().iterator();
         int index = 0;
+        Log.d("deBug", "In update");
+        //Log.d("deBug","puls = " + String.valueOf(pulsatorLayoutArrayList.size()));
         while (iterator.hasNext()) {
+            Log.d("deBug", "in while");
             Map.Entry pair = (Map.Entry) iterator.next();
             LatLng position = ((LatLng)pair.getValue());
             Log.d("deBugg", mMap.toString());
@@ -41,11 +44,16 @@ public class PulseMarkerHandler {
             pulsatorLayoutArrayList.get(index).setX(point.x - 150);
             pulsatorLayoutArrayList.get(index).setY(point.y - 150);
             pulsatorLayoutArrayList.get(index).setVisibility(View.VISIBLE);
+            pulsatorLayoutArrayList.get(index).setAlpha(0.3f);
+            pulsatorLayoutArrayList.get(index).setCount(4);
+            pulsatorLayoutArrayList.get(index).setDuration(7000);
+            pulsatorLayoutArrayList.get(index).start();
 
-            index ++;
+            index++;
         }
 
-        for (int i = index + 1; i < 12; i++){
+
+        for (int i = index + 1; i < 12; i++) {
             pulsatorLayoutArrayList.get(i).setVisibility(View.INVISIBLE);
         }
     }
