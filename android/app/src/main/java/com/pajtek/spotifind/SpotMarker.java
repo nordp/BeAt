@@ -8,6 +8,7 @@ import android.util.Log;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
@@ -26,19 +27,18 @@ class SpotMarker {
     private String trackUri;
     private String artistName;
 
-    MarkerOptions customMarker;
+    Marker customMarker;
 
     SpotMarker(final GoogleMap mMap, String spotKey, String trackName, String trackId, String artistName, final String albumCoverWebUrl, final LatLng latLng) {
         this.spotKey = spotKey;
         this.trackName = trackName;
         this.trackUri = "spotify:track:" + trackId;
         this.artistName = artistName;
-        this.customMarker =  new MarkerOptions().position(latLng).flat(false);
+        final MarkerOptions markerOptions =  new MarkerOptions().position(latLng).flat(false);
         new ImageLoader() {
             @Override
             protected void onPostExecute(Bitmap bmp) {
-                customMarker = customMarker.icon(BitmapDescriptorFactory.fromBitmap(bmp));
-                mMap.addMarker(customMarker);
+                customMarker = mMap.addMarker(markerOptions.icon(BitmapDescriptorFactory.fromBitmap(bmp)));
                 Log.e("SpotMarker", "Marker added");
             }
         }.execute(albumCoverWebUrl);
