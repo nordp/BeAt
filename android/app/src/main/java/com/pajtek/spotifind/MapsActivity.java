@@ -146,6 +146,9 @@ public class MapsActivity extends FragmentActivity implements
             }
         }, FETCH_LOCATION_EVERY_X_MS, FETCH_LOCATION_EVERY_X_MS);
 
+        // Set tracks sheet invisible until we have songs
+        this.findViewById(R.id.tracks_sheet).setVisibility(View.INVISIBLE);
+
         // TODO If the user is already "logged in", just remove the log in button & stuff. But maybe not required for this app right now?
     }
 
@@ -393,6 +396,13 @@ public class MapsActivity extends FragmentActivity implements
             textView.setText(trackInfo.artistName + " – " + trackInfo.trackName);
 
         }
+
+        View tracksSheet = this.findViewById(R.id.tracks_sheet);
+        tracksSheet.setAlpha(0.0f);
+        tracksSheet.setVisibility(View.VISIBLE);
+        ObjectAnimator alphaAnimator = ObjectAnimator.ofFloat(tracksSheet, "alpha", 1.0f);
+        alphaAnimator.setDuration(800);
+        alphaAnimator.start();
     }
 
     public void topTrackPressed(View view) {
