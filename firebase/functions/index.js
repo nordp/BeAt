@@ -45,7 +45,7 @@ exports.removeSpot = functions.database
 
 exports.fetchSongData = functions.database
 .ref('spots/{spotId}/trackId')
-.onWrite(event => {
+.onCreate(event => {
     var client_id = fs.readFileSync('PUBLIC_KEY', 'utf8');
     var client_secret = fs.readFileSync('SECRET_KEY', 'utf8');
     var authHeader = 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64'));
@@ -64,8 +64,8 @@ exports.fetchSongData = functions.database
         if (!error && response.statusCode === 200) {
           var accessToken = body.access_token;
           console.log("access token retreived:" + accessToken)
-          console.log("eventData" + JSON.stringify(event.data))
-          var uri = JSON.stringify(event.data).substring(1,  JSON.stringify(event.data).length - 1);
+          console.log("eventData" + event.data.val())
+          var uri = event.data.val()
           var queryOptions = {
             url: 'https://api.spotify.com/v1/tracks/' + uri,
             headers: { 'Authorization': 'Bearer ' + accessToken },
@@ -83,11 +83,11 @@ exports.fetchSongData = functions.database
               var info = res.body;
               
 
-              var track_id = event.data.ref;
-              resolve(track_id.parent.child('info').set({
+              resolve(event.data.adminRef.parent.child('info').set({
                 'name': info.name,
                 'artistName': info.artists[0].name,
-                'albumCoverWebUrl': info.album.images[1].url
+                'albumCoverWebUrl': info.album.images[1].url,
+                'trackId': event.data.val()
               }
             ));
             } else {
