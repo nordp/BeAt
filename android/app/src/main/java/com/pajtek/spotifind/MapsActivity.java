@@ -13,12 +13,8 @@ import android.location.Location;
 import android.media.AudioManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.support.v4.view.ViewPager;
-import android.util.AttributeSet;
-import android.util.JsonReader;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -111,7 +107,7 @@ public class MapsActivity extends FragmentActivity implements
     Map<String, SpotMarker> placedSpotMarkers = new HashMap<>();
     private GeoQuery geoQuery;
 
-    //private Map<String, SpotMarker> m
+    private final static double PLAY_SONG_WITHIN_RADIUS_M = 100;
 
     private Marker mCurrentPositionMarker;
     LatLng mLastPosition = null;
@@ -228,9 +224,20 @@ public class MapsActivity extends FragmentActivity implements
 
         geoQuery.setCenter(new GeoLocation(position.latitude, position.longitude));
 
-        // TODO
-        // TODO Here we can do stuff like query for the next applicable song etc.
-        // TODO
+        // Update closest song/marker
+        SpotMarker closestMarker = getMarkerClosestToPosition(position);
+        if (closestMarker != null) {
+            double distance = distanceBetweenLocations(closestMarker.getPosition(), position);
+            String currentlyPlayingURI = mSpotifyPlayer.getMetadata().currentTrack != null
+                    ? mSpotifyPlayer.getMetadata().currentTrack.uri
+                    : null;
+
+            // Play song if it's within the radius and isn't already playing
+            if (distance <= PLAY_SONG_WITHIN_RADIUS_M && !closestMarker.getTrackInfo().trackUri.equals(currentlyPlayingURI)) {
+                TrackInfo track = closestMarker.getTrackInfo();
+                fadeInSong(track);
+            }
+        }
 
         mLastPosition = position;
     }
@@ -247,6 +254,39 @@ public class MapsActivity extends FragmentActivity implements
         } else {
             mCurrentPositionMarker.setPosition(currentPosition);
         }
+    }
+
+    private SpotMarker getMarkerClosestToPosition(LatLng position) {
+        SpotMarker closest = null;
+        double closestDistance = Double.POSITIVE_INFINITY;
+
+        for (SpotMarker marker : placedSpotMarkers.values()) {
+            double distance = distanceBetweenLocationsRelative(position, marker.getPosition());
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closest = marker;
+            }
+        }
+
+        return closest;
+    }
+
+    private double distanceBetweenLocationsRelative(LatLng p1, LatLng p2) {
+        double x = p1.longitude - p2.longitude;
+        double y = p1.latitude - p2.latitude;
+        return Math.sqrt(x * x + y * y);
+    }
+
+    private double distanceBetweenLocations(LatLng p1, LatLng p2) {
+        double R = 6378.137; // Radius of earth in KM
+        double dLat = p2.latitude * Math.PI / 180 - p1.latitude * Math.PI / 180;
+        double dLon = p2.longitude * Math.PI / 180 - p1.longitude * Math.PI / 180;
+        double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(p1.latitude * Math.PI / 180) * Math.cos(p2.latitude * Math.PI / 180) *
+                        Math.sin(dLon/2) * Math.sin(dLon/2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        double d = R * c;
+        return d * 1000; // meters
     }
 
     @Override
@@ -402,6 +442,10 @@ public class MapsActivity extends FragmentActivity implements
     //
 
     private void fadeInSong(final String trackId) {
+        fadeInSong(new TrackInfo("NOT SET", "NOT SET", trackId));
+    }
+
+    private void fadeInSong(final TrackInfo track) {
 
         final float targetMaxVolume = getSpotifyPlayerVolume();
 
@@ -425,7 +469,7 @@ public class MapsActivity extends FragmentActivity implements
                         @Override
                         public void onAnimationEnd(Animator animation) {
 
-                            mSpotifyPlayer.playUri(null, trackId, 0, 0);
+                            mSpotifyPlayer.playUri(null, track.trackUri, 0, 0);
 
                             ValueAnimator vaIn = ValueAnimator.ofFloat(0.0f, targetMaxVolume);
                             vaIn.setDuration(FADE_IN_OUT_TIME_MS);
@@ -468,7 +512,7 @@ public class MapsActivity extends FragmentActivity implements
                             Log.e("MapsActivity", "Can't play Spotify URI");
                         }
 
-                    }, trackId, 0, 0);
+                    }, track.trackUri, 0, 0);
 
                 }
 
@@ -565,10 +609,6 @@ public class MapsActivity extends FragmentActivity implements
 
         view.setVisibility(View.INVISIBLE);
         // Fade out green tint when logged in! (in callback later)
-
-        ImageView imageView = (ImageView) findViewById(R.id.gradientImageView);
-        imageView.setAlpha(0.2f);
-
     }
     public void debugButtonPressed(View view){
         Log.d("LOGGED", mMap.getCameraPosition().target.toString());

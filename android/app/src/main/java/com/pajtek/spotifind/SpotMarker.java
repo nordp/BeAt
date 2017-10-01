@@ -72,6 +72,13 @@ class SpotMarker implements ValueEventListener{
 
     }
 
+    public TrackInfo getTrackInfo() {
+        return new TrackInfo(artistName, trackName, trackUri);
+    }
+
+    public LatLng getPosition() {
+        return customMarker.getPosition();
+    }
 
     private class ImageLoader extends AsyncTask<String, Void, Bitmap>{
 
