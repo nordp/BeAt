@@ -35,14 +35,6 @@
             android:scaleType="fitCenter"
             android:src="@drawable/connect_button"/>
 
-        <Button
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:adjustViewBounds="true"
-            android:onClick="debugButtonPressed"
-            android:scaleType="fitCenter"
-            android:text="Camera" />
-
         <pl.bclogic.pulsator4droid.library.PulsatorLayout
             android:id="@+id/pulsator0"
             android:layout_width="300px"
