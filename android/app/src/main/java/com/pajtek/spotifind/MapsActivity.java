@@ -148,6 +148,7 @@ public class MapsActivity extends FragmentActivity implements
 
         // Set tracks sheet invisible until we have songs
         this.findViewById(R.id.tracks_sheet).setVisibility(View.INVISIBLE);
+        this.findViewById(R.id.addOverLay).setVisibility(View.INVISIBLE);
 
         // TODO If the user is already "logged in", just remove the log in button & stuff. But maybe not required for this app right now?
     }
@@ -405,6 +406,8 @@ public class MapsActivity extends FragmentActivity implements
         alphaAnimator.start();
     }
 
+    private TrackInfo trackSelectedToPush = null;
+
     public void topTrackPressed(View view) {
         final int[] trackIds = new int[]{ R.id.track1, R.id.track2, R.id.track3, R.id.track4, R.id.track5 };
 
@@ -412,7 +415,13 @@ public class MapsActivity extends FragmentActivity implements
             if (view.getId() == trackIds[i]) {
 
                 TrackInfo selectedTrack = mUserTopTracks.get(i);
-                addSongToCurrentLocation(selectedTrack);
+                trackSelectedToPush = selectedTrack;
+
+                View addOverlay = findViewById(R.id.addOverLay);
+                ((TextView)findViewById(R.id.artistName)).setText(selectedTrack.artistName);
+                ((TextView)findViewById(R.id.trackName)).setText(selectedTrack.trackName);
+                addOverlay.setVisibility(View.VISIBLE);
+
                 return;
 
             }
@@ -420,6 +429,24 @@ public class MapsActivity extends FragmentActivity implements
 
         // Something went wrong, couldn't find the song
         Log.e("MapsActivity", "The user pressed some top track that doesn't exist?!");
+    }
+
+    public void cancelAddSongPressed(View view) {
+        trackSelectedToPush = null;
+        View addOverlay = findViewById(R.id.addOverLay);
+        addOverlay.setVisibility(View.INVISIBLE);
+        View trackList = findViewById(R.id.tracks_sheet);
+        addButtonPressed(trackList);
+    }
+
+    public void confirmAddSongPressed(View view) {
+        if (trackSelectedToPush != null) {
+            addSongToCurrentLocation(trackSelectedToPush);
+        }
+        View addOverlay = findViewById(R.id.addOverLay);
+        addOverlay.setVisibility(View.INVISIBLE);
+        View trackList = findViewById(R.id.tracks_sheet);
+        addButtonPressed(trackList);
     }
 
     private void addSongToCurrentLocation(TrackInfo track) {
