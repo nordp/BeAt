@@ -186,12 +186,15 @@ public class MapsActivity extends FragmentActivity implements
         mFusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
-                if (location != null) {
-                    currentLocationUpdated(location);
-                    Log.d("MapsActivity", "New location fetched: " + location.toString());
+                LatLng latLng;
+                if (location == null) {
+                    Log.d("MapsActivity", "New location fetched, but from emulator so it's null. Faking Spotify location");
+                    latLng = new LatLng(57.704217, 11.965250);
                 } else {
-                    Log.d("MapsActivity", "New location fetched, but from emulator so it's null.");
+                    Log.d("MapsActivity", "New location fetched: " + location.toString());
+                    latLng = new LatLng(location.getLatitude(), location.getLongitude());
                 }
+                currentLocationUpdated(latLng);
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -210,14 +213,12 @@ public class MapsActivity extends FragmentActivity implements
         }
     }
 
-    private void currentLocationUpdated(Location location) {
+    private void currentLocationUpdated(LatLng position) {
 
         if (mMap == null || !mSpotifyLoggedIn) {
             Log.d("MapsActivity", "Can't set markers etc. since maps isn't initialized yet and not yet logged in to Spotify!");
             return;
         }
-
-        LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
 
         updateCurrentLocationMarker(position);
 
@@ -717,6 +718,7 @@ public class MapsActivity extends FragmentActivity implements
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
                 SpotMarker newMarker = new SpotMarker(mMap, key, new LatLng(location.latitude, location.longitude));
+                visibleAlbumSpotMarkers.put(key, newMarker);
                 spots.child(key).child("info").addValueEventListener(newMarker);
             }
 
