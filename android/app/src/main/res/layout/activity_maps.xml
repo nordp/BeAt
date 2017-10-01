@@ -118,10 +118,10 @@
     <RelativeLayout
         android:id="@+id/tracks_sheet"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        app:behavior_hideable="false"
-        app:behavior_peekHeight="60dp"
-        app:elevation="4dp"
+        android:layout_height="280dp"
+        app:behavior_hideable="true"
+        app:behavior_peekHeight="50dp"
+        app:elevation="8dp"
         app:layout_behavior="@string/bottom_sheet_behavior">
 
         <ImageView
@@ -129,7 +129,8 @@
             android:layout_width="match_parent"
             android:layout_margin="0dp"
             android:padding="0dp"
-            android:layout_height="300dp"
+            android:scaleType="fitXY"
+            android:layout_height="match_parent"
             android:src="@drawable/button_tracklist"
             android:background="?android:attr/panelBackground"
             android:layout_alignParentTop="true"/>

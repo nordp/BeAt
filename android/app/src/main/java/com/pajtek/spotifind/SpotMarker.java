@@ -30,6 +30,8 @@ class SpotMarker implements ValueEventListener{
     private String trackUri;
     private String artistName;
 
+    private static final int ALBUM_ICON_SIZE = 200;
+
     Marker customMarker;
 
     SpotMarker(final GoogleMap mMap, String spotKey, LatLng location) {
@@ -60,7 +62,7 @@ class SpotMarker implements ValueEventListener{
         new ImageLoader() {
             @Override
             protected void onPostExecute(Bitmap bmp) {
-                customMarker.setIcon(BitmapDescriptorFactory.fromBitmap(bmp));
+                customMarker.setIcon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(bmp, ALBUM_ICON_SIZE, ALBUM_ICON_SIZE, false)));
                 Log.e("SpotMarker", "Marker added");
             }
         }.execute((String)dataSnapshot.child("albumCoverWebUrl").getValue());

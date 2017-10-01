@@ -56,6 +56,7 @@ import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.spotify.sdk.android.player.Config;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
 import com.spotify.sdk.android.player.Error;
+import com.spotify.sdk.android.player.Metadata;
 import com.spotify.sdk.android.player.Player;
 import com.spotify.sdk.android.player.PlayerEvent;
 import com.spotify.sdk.android.player.Spotify;
@@ -114,7 +115,7 @@ public class MapsActivity extends FragmentActivity implements
 
     Map<String, LatLng> animatedMarkers = new HashMap<>();
     private GeoQuery animatedMarkerQuery;
-    private final static double ANIMATE_MARKER_WITHIN_RADIUS_M = 10000;
+    private final static double ANIMATE_MARKER_WITHIN_RADIUS_M = 1000;
 
 
     Map<String, SpotMarker> visibleAlbumSpotMarkers = new HashMap<>();
@@ -125,6 +126,7 @@ public class MapsActivity extends FragmentActivity implements
     LatLng mLastPosition = null;
     private PulsatorLayout pulsatorLayout;
     private BottomSheetDialogFragment tracklist;
+    private String pausedTrackUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -743,7 +745,7 @@ public class MapsActivity extends FragmentActivity implements
 
             @Override
             public void onGeoQueryReady() {
-                Log.d("MapsActivity", "GEOQUERY READY");
+
             }
 
             @Override
@@ -758,13 +760,13 @@ public class MapsActivity extends FragmentActivity implements
             public void onKeyEntered(String key, GeoLocation location) {
                 animatedMarkers.put(key, new LatLng(location.latitude, location.longitude));
 
-                //TODO CALL ANIMATION UPDATE ONCE
+                pulseMarkerHandler.update();
             }
 
             @Override
             public void onKeyExited(String key) {
                 animatedMarkers.remove(key);
-                //TODO CALL ANIMATION UPDATE ONCE
+                pulseMarkerHandler.update();
             }
 
             @Override
@@ -843,18 +845,21 @@ public class MapsActivity extends FragmentActivity implements
 
     public void playButtonClicked(View view){
         if (mSpotifyPlayer.getPlaybackState().isPlaying){
-        mSpotifyPlayer.pause(new Player.OperationCallback() {
-            @Override
-            public void onSuccess() {
-                ImageButton button = (ImageButton) findViewById(R.id.playButton);
-                button.setImageDrawable(getResources().getDrawable(R.drawable.button_play));
-            }
+            pausedTrackUri = mSpotifyPlayer.getMetadata().currentTrack.uri;
+            mSpotifyPlayer.pause(new Player.OperationCallback() {
+                @Override
+                public void onSuccess() {
+                    ImageButton button = (ImageButton) findViewById(R.id.playButton);
+                    button.setImageDrawable(getResources().getDrawable(R.drawable.button_play));
+                }
 
-            @Override
-            public void onError(Error error) {
-
-            }
-        });}
+                @Override
+                public void onError(Error error) {
+                    Log.e("MapsActivity", "PausingError " + error.toString());
+                }
+            });} else {
+                fadeInSong(pausedTrackUri);
+        }
     }
     //UTIL
     private double getVisibleRegion() {
