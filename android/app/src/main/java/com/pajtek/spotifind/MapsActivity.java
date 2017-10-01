@@ -46,6 +46,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.VisibleRegion;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.maps.android.MarkerManager;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
@@ -102,7 +103,7 @@ public class MapsActivity extends FragmentActivity implements
 
     GeoFire geoFire = new GeoFire(FirebaseDatabase.getInstance().getReference("/geofire"));
     DatabaseReference spots = FirebaseDatabase.getInstance().getReference("spots");
-    Map<String, LatLng> placedSpotMarkers = new HashMap<>();
+    Map<String, Marker> placedSpotMarkers = new HashMap<>();
     private GeoQuery placedSpotQuery;
 
     Map<String, LatLng> animatedMarkers = new HashMap<>();
@@ -227,7 +228,8 @@ public class MapsActivity extends FragmentActivity implements
             initGeoFire(position);
         }
 
-        placedSpotQuery.setCenter(new GeoLocation(position.latitude, position.longitude));
+        animatedMarkerQuery.setCenter(new GeoLocation(position.latitude, position.longitude));
+        visibleAlbumSpotQuery.setCenter(new GeoLocation(position.latitude, position.longitude));
 
         // Update closest song/marker
         SpotMarker closestMarker = getMarkerClosestToPosition(position);
@@ -430,7 +432,8 @@ public class MapsActivity extends FragmentActivity implements
             @Override
             public void onCameraMove() {
                 if (placedSpotQuery != null && mSpotifyLoggedIn) {
-                    placedSpotQuery.setRadius(getVisibleRegion());
+                    GeoLocation loc = new GeoLocation(mMap.getCameraPosition().target.latitude,mMap.getCameraPosition().target.longitude);
+                    placedSpotQuery.setLocation(loc, getVisibleRegion());
                 }
                 replaceAnimation();
             }
@@ -646,15 +649,19 @@ public class MapsActivity extends FragmentActivity implements
         placedSpotQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
-                placedSpotMarkers.put(key, new LatLng(location.latitude, location.longitude));
+                LatLng markerLoc = new LatLng(location.latitude, location.longitude);
+
+                MarkerOptions placedMarkerOptions = new MarkerOptions().flat(false).position(markerLoc).icon(BitmapDescriptorFactory.fromResource(R.drawable.user_position_small));
+                Marker placedMarker = mMap.addMarker(placedMarkerOptions);
+
+                placedSpotMarkers.put(key, placedMarker);
                 Log.i("MapsActivity", "MARKER PUT! key: " + key);
             }
 
             @Override
             public void onKeyExited(String key) {
-
                 Log.i("MapsActivity", "Removing " + key);
-                placedSpotMarkers.remove(key);
+                placedSpotMarkers.remove(key).remove();
                 Log.i("MapsActivity", "MARKER REMOVED!");
             }
 
