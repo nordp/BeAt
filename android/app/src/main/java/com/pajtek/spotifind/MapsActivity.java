@@ -647,11 +647,11 @@ public class MapsActivity extends FragmentActivity implements
         BottomSheetBehavior trackListBehavior = BottomSheetBehavior.from(trackList);
         if(trackListBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
             trackListBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-            //view.findViewById(R.id.action_sign).setRotation(45);
+            view.findViewById(R.id.tracklistButton).setRotation(45);
         }
         else {
             trackListBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-            //view.findViewById(R.id.action_sign).setRotation(0);
+            view.findViewById(R.id.tracklistButton).setRotation(0);
         }
     }
 

@@ -118,14 +118,17 @@
     <RelativeLayout
         android:id="@+id/tracks_sheet"
         android:layout_width="match_parent"
-        android:layout_height="340dp"
+        android:layout_height="300dp"
         app:behavior_hideable="false"
         app:behavior_peekHeight="60dp"
         app:elevation="4dp"
         app:layout_behavior="@string/bottom_sheet_behavior">
 
         <ImageView
+            android:id="@+id/panelBorder"
             android:layout_width="match_parent"
+            android:layout_margin="0dp"
+            android:padding="0dp"
             android:layout_height="wrap_content"
             android:src="@drawable/button_tracklist"
             android:scaleType="fitCenter"
@@ -147,6 +150,9 @@
             android:id="@+id/track1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:paddingLeft="24dp"
+            android:paddingTop="12dp"
             android:text="Carly Rae Jepsen : Cut To The Feeling"
             android:textColor="#FFFFFF"
             android:layout_below="@id/tracklistButton"
@@ -156,7 +162,10 @@
             android:id="@+id/track2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingLeft="24dp"
+            android:paddingTop="12dp"
             android:text="Carly Rae Jepsen : Cut To The Feeling"
+            android:textSize="20sp"
             android:textColor="#FFFFFF"
             android:layout_below="@id/track1"
             />
@@ -165,7 +174,10 @@
             android:id="@+id/track3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingLeft="24dp"
+            android:paddingTop="12dp"
             android:text="Carly Rae Jepsen : Cut To The Feeling"
+            android:textSize="20sp"
             android:textColor="#FFFFFF"
             android:layout_below="@id/track2"
             />
@@ -174,7 +186,10 @@
             android:id="@+id/track4"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingLeft="24dp"
+            android:paddingTop="12dp"
             android:text="Carly Rae Jepsen : Cut To The Feeling"
+            android:textSize="20sp"
             android:textColor="#FFFFFF"
             android:layout_below="@id/track3"
             />
@@ -183,11 +198,39 @@
             android:id="@+id/track5"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingLeft="24dp"
+            android:paddingTop="12dp"
             android:text="Carly Rae Jepsen : Cut To The Feeling"
+            android:textSize="20sp"
             android:textColor="#FFFFFF"
             android:layout_below="@id/track4"
             />
-        </RelativeLayout>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>
 
