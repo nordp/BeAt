@@ -150,6 +150,7 @@ public class MapsActivity extends FragmentActivity implements
         // Set tracks sheet invisible until we have songs
         this.findViewById(R.id.tracks_sheet).setVisibility(View.INVISIBLE);
         this.findViewById(R.id.addOverLay).setVisibility(View.INVISIBLE);
+        this.findViewById(R.id.playButton).setVisibility(View.INVISIBLE);
 
         // TODO If the user is already "logged in", just remove the log in button & stuff. But maybe not required for this app right now?
     }
@@ -518,6 +519,13 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     private void fadeInSong(final TrackInfo track) {
+
+        View playButton = this.findViewById(R.id.playButton);
+        playButton.setAlpha(0.0f);
+        playButton.setVisibility(View.VISIBLE);
+        ObjectAnimator alphaAnimator = ObjectAnimator.ofFloat(playButton, "alpha", 1.0f);
+        alphaAnimator.setDuration(800);
+        alphaAnimator.start();
 
         final float targetMaxVolume = getSpotifyPlayerVolume();
 
