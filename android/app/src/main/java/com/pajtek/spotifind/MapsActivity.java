@@ -105,6 +105,8 @@ public class MapsActivity extends FragmentActivity implements
     private final static float MAP_DEFAULT_ZOOM = 16.0f;
     private final static long FADE_IN_OUT_TIME_MS = 500;
 
+    private final static int N_RECENT_TRACKS = 3;
+
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationClient;
 
@@ -344,7 +346,7 @@ public class MapsActivity extends FragmentActivity implements
         }
 
         RequestQueue queue = Volley.newRequestQueue(this);
-        final String url = "https://api.spotify.com/v1/me/top/tracks?time_range=short_term&limit=10&offset=0";
+        final String url = "https://api.spotify.com/v1/me/top/tracks?time_range=short_term&limit=20&offset=0";
 
         JsonObjectRequest topTracksRequest = new SpotifyRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 
@@ -367,6 +369,15 @@ public class MapsActivity extends FragmentActivity implements
                         mUserTopTracks.add(track);
 
                     }
+                    //Randomize list after N_RECENT_TRACKS songs in mUserTopTracks
+                    List<TrackInfo> shuffleSelection = mUserTopTracks.subList(N_RECENT_TRACKS,mUserTopTracks.size()-1);
+                    Random r = new Random();
+                    int offset = r.nextInt(shuffleSelection.size());
+                    List<TrackInfo> shuffledTracks = shuffleSelection.subList(offset, shuffleSelection.size());
+                    shuffledTracks.addAll(shuffleSelection.subList(0,offset));
+
+                    mUserTopTracks = mUserTopTracks.subList(0,N_RECENT_TRACKS-1);
+                    mUserTopTracks.addAll(shuffledTracks);
 
                     runOnUiThread(new Runnable() {
                         @Override
@@ -401,7 +412,6 @@ public class MapsActivity extends FragmentActivity implements
 
             TextView textView = (TextView) this.findViewById(trackIds[i]);
             textView.setText(trackInfo.artistName + " – " + trackInfo.trackName);
-
         }
 
         View tracksSheet = this.findViewById(R.id.tracks_sheet);
