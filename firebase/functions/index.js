@@ -43,6 +43,8 @@ exports.removeSpot = functions.database
     });
 });
 
+
+//Also responsible for setting the UTC time of the uploaded spot
 exports.fetchSongData = functions.database
 .ref('spots/{spotId}/trackId')
 .onCreate(event => {
@@ -59,6 +61,10 @@ exports.fetchSongData = functions.database
       json: true
     };
 
+
+    var time = new Date();
+    event.data.adminRef.parent.child('time').set(time.getUTCDate() + '-' + time.getUTCMonth() + '-' + time.getUTCFullYear())
+
     return new Promise((resolve, reject) => {
       request.post(authOptions, function(error, response, body) {
         if (!error && response.statusCode === 200) {
@@ -70,7 +76,7 @@ exports.fetchSongData = functions.database
             url: 'https://api.spotify.com/v1/tracks/' + uri,
             headers: { 'Authorization': 'Bearer ' + accessToken },
             form : {
-              market: 'ES'
+              market: 'SE'
             },
             json: true
           }
